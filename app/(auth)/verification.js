@@ -10,8 +10,8 @@ const verification = () => {
     const [ otpPass, setOtpPass ] = useState(null);
 
     const hiddenNum = (phoneNum) => {
-        lastNum = phoneNum.slice(8);
-        formattedNum = '+601*-*** ' + lastNum;
+        lastNum = phoneNum.slice(9);
+        formattedNum = '+60 01*-*** ' + lastNum;
         return formattedNum;
     };
     

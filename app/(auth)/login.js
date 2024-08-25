@@ -3,17 +3,37 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 
 const Login = () => {
-  const x = 'abc';
-  const y = '123';
+  const x = '+600198781785';
+  const y = '12345678';
 
-  const [phoneNum, setPhoneNum] = useState('');
+  const [phoneNum, setPhoneNum] = useState('+60');
   const [password, setPassword] = useState('');
 
   const router = useRouter();
 
+  const handleChange = (text) => {
+    if (text.startsWith('+60') && text.length <= 14) {
+      setPhoneNum(text);
+    };
+  };
+
   const handleLogin = () => {
-    if (y == phoneNum && x == password) {
-      router.replace('keypad');
+    if (phoneNum[3] == '1') {
+      formattedNum = phoneNum.slice(0,3) + '0' + phoneNum.slice(3);
+    } else {
+      formattedNum = phoneNum;
+    };
+
+    if (x == formattedNum && y == password) {
+      const profile = {
+        phoneNum: formattedNum,
+        password
+      };
+      
+      router.navigate({
+        pathname: 'verification',
+        params: profile
+      });
     } else {
       router.navigate('register');
     }
@@ -29,7 +49,7 @@ const Login = () => {
         style={styles.input}
         placeholder='Phone number'
         value={phoneNum}
-        onChangeText={(text) => setPhoneNum(text)}
+        onChangeText={handleChange}
         keyboardType='phone-pad'
       />
       <Text style={styles.inputTitle}>PASSWORD</Text>

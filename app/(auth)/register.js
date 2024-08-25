@@ -13,7 +13,7 @@ const Register = () => {
   const router = useRouter();
 
   const handleChange = (text) => {
-    if (text.startsWith('+60') && text.length <= 13) {
+    if (text.startsWith('+60') && text.length <= 14) {
       setPhoneNum(text);
     };
   };
@@ -23,9 +23,9 @@ const Register = () => {
       setPasswordLength(true);
     } else {
       setPasswordLength(false);
-    }
+    };
     setPassword(text);
-  }
+  };
 
   const handleConfirmPassword = (text) => {
     if (text.length > 0 && text == password && password.length > 0) {
@@ -37,8 +37,14 @@ const Register = () => {
   };
 
   const handleButtonPress = () => {
+    if (phoneNum[3] == '1') {
+      formattedNum = phoneNum.slice(0,3) + '0' + phoneNum.slice(3);
+    } else {
+      formattedNum = phoneNum;
+    }
+    
     const profile = {
-      phoneNum,
+      phoneNum: formattedNum,
       password
     };
 
