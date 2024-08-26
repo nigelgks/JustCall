@@ -1,10 +1,11 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform} from 'react-native';
 import React, { useState } from 'react';
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router/build';
+import { useAuth0 } from 'react-native-auth0';
 
 const verification = () => {
+    const { authorize } = useAuth0();
     const router = useRouter();
     const { phoneNum, password } = useLocalSearchParams();
     const [ code, setCode ] = useState(null);
@@ -41,12 +42,24 @@ const verification = () => {
         .then(res => {
             console.log(res);
             if (res.status === 'approved') {
-            alert('Phone Verified');
-            router.replace('keypad');
+                alert('Phone Verified');
+                signInUser();
             } else {
-            alert('Verfication failed try again!!');
+                alert('Verfication failed try again!!');
             }
         });
+    };
+
+    const signInUser = async () => {
+        try {
+            await authorize();
+        } catch (error) {
+            console.log("Unable to sign in:", error);
+        } finally {
+            alert('Login successful!');
+            console.log("Login successful!");
+            router.replace('keypad');
+        };
     };
 
     return (
