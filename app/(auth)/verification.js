@@ -7,7 +7,9 @@ import { useLocalSearchParams } from 'expo-router/build';
 const verification = () => {
     const router = useRouter();
     const { phoneNum, password } = useLocalSearchParams();
-    const [ otpPass, setOtpPass ] = useState(null);
+    const [ code, setCode ] = useState(null);
+
+    const BaseURL = 'http://192.168.0.147:3000';
 
     const hiddenNum = (phoneNum) => {
         lastNum = phoneNum.slice(9);
@@ -15,8 +17,36 @@ const verification = () => {
         return formattedNum;
     };
     
-    const handleOTP = () => {
+    const sendCode = () => {
+        fetch(`${BaseURL}/verify/${phoneNum}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+        })
+        .catch(err => {
+            alert(err);
+            console.log(err);
+        });
+    };
 
+    const checkCode = () => {
+        fetch(`${BaseURL}/check/${phoneNum}/${code}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+        })
+        .then(res => res.json())
+        .then(res => {
+            console.log(res);
+            if (res.status === 'approved') {
+            alert('Phone Verified');
+            router.replace('keypad');
+            } else {
+            alert('Verfication failed try again!!');
+            }
+        });
     };
 
     return (
@@ -26,10 +56,6 @@ const verification = () => {
             style={{flex: 1, paddingTop: 35}}
         >
             <ScrollView>
-                <TouchableOpacity style={{paddingLeft: 10}} onPress={() => router.navigate('register')}>
-                    <Ionicons name="arrow-back-circle" size={40} color='black'/>
-                </TouchableOpacity>
-
                 <View style={styles.container}>
                     <Text style={styles.title}>Phone Number Verification</Text>
                     <Text style={styles.desc}>Verification code has been sent to you.</Text>
@@ -40,14 +66,14 @@ const verification = () => {
                     <Text style={styles.inputTitle}>ONE-TIME PASSWORD (OTP)</Text>
                     <TextInput
                         style={styles.input}
-                        value={otpPass}
+                        value={code}
                         placeholder='XXX-XXX'
-                        onChangeText={(text) => setOtpPass(text)}
+                        onChangeText={(text) => setCode(text)}
                         keyboardType='numeric'
                     />
                     <TouchableOpacity
                         style={styles.pressable}
-                        onPress={handleOTP}
+                        onPress={sendCode}
                     >
                         <Text style={{textAlign: 'center'}}>
                         Resend code
@@ -55,7 +81,8 @@ const verification = () => {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.button}
-                        disabled={!otpPass}
+                        onPress={checkCode}
+                        disabled={!code}
                     >
                         <Text style={styles.buttonText}>
                         Next
