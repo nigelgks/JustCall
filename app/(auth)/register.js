@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 const Register = () => {
-  const [email, setEmail] = useState('');
   const [phoneNum, setPhoneNum] = useState('+60');
   const [password, setPassword] = useState('');
   const [confirmedPassword, setConfirmedPassword] = useState('');
@@ -48,7 +47,6 @@ const Register = () => {
     
     const profile = {
       signIn,
-      email,
       phoneNum: formattedNum,
       password
     };
@@ -73,14 +71,6 @@ const Register = () => {
         <View style={styles.container}>
           <Text style={styles.title}>Registration</Text> 
 
-          <Text style={styles.inputTitle}>EMAIL</Text>
-          <TextInput
-            style={styles.input}
-            placeholder='Email address'
-            value={email}
-            onChangeText={(text) => setEmail(text)}
-            keyboardType='email-address'
-          />
           <Text style={styles.inputTitle}>PHONE NUMBER</Text>
           <TextInput
             style={styles.input}
@@ -115,7 +105,7 @@ const Register = () => {
           <TouchableOpacity
             style={styles.button}
             onPress={handleButtonPress}
-            disabled={!email || !phoneNum || !password || !confirmedPassword}
+            disabled={!phoneNum || !password || !confirmedPassword}
           >
             <Text style={styles.buttonText}>
               Next

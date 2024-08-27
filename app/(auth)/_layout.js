@@ -1,5 +1,6 @@
 import React from 'react';
 import { Stack } from 'expo-router';
+import AuthProvider from '../../providers/AuthProvider';
 
 const AuthLayout = () => {
   return (
@@ -7,6 +8,7 @@ const AuthLayout = () => {
       <Stack.Screen name="login"/>
       <Stack.Screen name="register"/>
       <Stack.Screen name="verification"/>
+      <Stack.Screen name="identification"/>
     </Stack>
   );
 };

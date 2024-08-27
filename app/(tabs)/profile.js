@@ -1,22 +1,21 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
+import { supabase } from '../../supabase/supabase';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../../providers/AuthProvider';
 
 const profile = () => {
+  const {session} = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
-    // const { clearSession } = useAuth0();
-
-    // try {
-    //   await clearSession();
-    // } catch (error) {
-    //   console.log("Unable to logout:", error);
-    // } finally {
-    //   router.replace('login');
-    // };
-
-    router.replace('login');
+    try {
+      await supabase.auth.signOut();
+      console.log("Signed out successfully.");
+      router.replace('login');
+    } catch (error) {
+        console.log("Unable to sign out: ", error);
+    };
   };
 
   return (
@@ -25,11 +24,6 @@ const profile = () => {
       <TouchableOpacity onPress={handleLogout}>
         <Text>Logout</Text>
       </TouchableOpacity>
-
-      {/* <>
-        {user && <Text>Logged in as {user.name}</Text>}
-        {!user && <Text>Not logged in</Text>}
-      </> */}
     </View>
   )
 }

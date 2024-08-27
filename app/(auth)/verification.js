@@ -1,3 +1,6 @@
+// UPDATE THE CODE INPUT TO SOMETHING BETTER
+// AND LIMIT TO 6 CHARACTERS ONLY
+
 import { View,
          Text,
          StyleSheet,
@@ -8,13 +11,15 @@ import { View,
          Platform
         } from 'react-native';
 import React, { useState } from 'react';
-import { useLocalSearchParams } from 'expo-router/build';
+import { useLocalSearchParams, useRouter } from 'expo-router/build';
 import { supabase } from '../../supabase/supabase';
 
 const verification = () => {
+    const router = useRouter();
+
     const BaseURL = 'http://192.168.0.147:3000';
 
-    const { signIn, email, phoneNum, password } = useLocalSearchParams();
+    const { signIn, phoneNum, password } = useLocalSearchParams();
     const [ code, setCode ] = useState(null);
 
     const hiddenNum = (phoneNum) => {
@@ -74,10 +79,11 @@ const verification = () => {
     const logIn = async () => {
         try {
             await supabase.auth.signInWithPassword({
-                email,
+                phone: phoneNum,
                 password
             });
             console.log("Logged in successfully.");
+            router.replace('keypad');
         } catch (error) {
             console.log("Unable to login: ", error);
         };
@@ -90,15 +96,10 @@ const verification = () => {
                 password
             });
             console.log("Sign up successfully.");
+            router.replace('keypad');
         } catch (error) {
             console.log("Unable to register: ", error);
         };
-
-        // const {error} = await supabase.auth.signUp({phone: phoneNum, password})
-
-        // if (error) {
-        //     alert(error)
-        // }
     };
 
     return (
