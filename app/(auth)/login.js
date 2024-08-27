@@ -3,9 +3,11 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 
 const Login = () => {
+  const v = 'abc@yahoo.com'
   const x = '+600198781785';
   const y = '12345678';
 
+  const [email, setEmail] = useState('');
   const [phoneNum, setPhoneNum] = useState('+60');
   const [password, setPassword] = useState('');
 
@@ -24,8 +26,12 @@ const Login = () => {
       formattedNum = phoneNum;
     };
 
-    if (x == formattedNum && y == password) {
+    if (v == email && x == formattedNum && y == password) {
+      const signIn = true;
+      
       const profile = {
+        signIn,
+        email,
         phoneNum: formattedNum,
         password
       };
@@ -35,8 +41,12 @@ const Login = () => {
         params: profile
       });
     } else {
+      alert("User does not exist. Redirecting to registration.")
       router.navigate('register');
     }
+
+    setPhoneNum('+60');
+    setPassword('');
   };
 
   return (
@@ -44,6 +54,14 @@ const Login = () => {
       <Text style={styles.title}>Login</Text>
       <Text style={styles.desc}>Sign in to continue.</Text>
 
+      <Text style={styles.inputTitle}>EMAIL</Text>
+      <TextInput
+        style={styles.input}
+        placeholder='Email address'
+        value={email}
+        onChangeText={(text) => setEmail(text)}
+        keyboardType='email-address'
+      />
       <Text style={styles.inputTitle}>PHONE NUMBER</Text>
       <TextInput
         style={styles.input}

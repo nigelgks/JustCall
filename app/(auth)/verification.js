@@ -1,23 +1,28 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform} from 'react-native';
+import { View,
+         Text,
+         StyleSheet,
+         TouchableOpacity,
+         TextInput,
+         ScrollView,
+         KeyboardAvoidingView,
+         Platform
+        } from 'react-native';
 import React, { useState } from 'react';
-import { useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router/build';
-import { useAuth0 } from 'react-native-auth0';
+import { supabase } from '../../supabase/supabase';
 
 const verification = () => {
-    const { authorize } = useAuth0();
-    const router = useRouter();
-    const { phoneNum, password } = useLocalSearchParams();
-    const [ code, setCode ] = useState(null);
-
     const BaseURL = 'http://192.168.0.147:3000';
+
+    const { signIn, email, phoneNum, password } = useLocalSearchParams();
+    const [ code, setCode ] = useState(null);
 
     const hiddenNum = (phoneNum) => {
         lastNum = phoneNum.slice(9);
         formattedNum = '+60 01*-*** ' + lastNum;
         return formattedNum;
     };
-    
+
     const sendCode = () => {
         fetch(`${BaseURL}/verify/${phoneNum}`, {
             method: 'GET',
@@ -32,34 +37,68 @@ const verification = () => {
     };
 
     const checkCode = () => {
-        fetch(`${BaseURL}/check/${phoneNum}/${code}`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-        })
-        .then(res => res.json())
-        .then(res => {
-            console.log(res);
-            if (res.status === 'approved') {
-                alert('Phone Verified');
-                signInUser();
-            } else {
-                alert('Verfication failed try again!!');
-            }
-        });
+        // fetch(`${BaseURL}/check/${phoneNum}/${code}`, {
+        //     method: 'GET',
+        //     headers: {
+        //       'Content-Type': 'application/json',
+        //     },
+        // })
+        // .then(res => res.json())
+        // .then(res => {
+        //     console.log(res);
+        //     if (res.status === 'approved') {
+        //         alert('Phone Verified');
+                
+        //         if (signIn == 'true') {
+        //             console.log('Logging in');
+        //             logIn();
+        //         } else {
+        //             console.log('Signing up');
+        //             signingUp();
+        //         }
+        //     } else {
+        //         alert('Verification failed try again!');
+        //         return false;
+        //     }
+        // });
+
+        if (signIn == 'true') {
+            console.log('Logging in');
+            logIn();
+        } else {
+            console.log('Signing up');
+            signingUp();
+        }
     };
 
-    const signInUser = async () => {
+    const logIn = async () => {
         try {
-            await authorize();
+            await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
+            console.log("Logged in successfully.");
         } catch (error) {
-            console.log("Unable to sign in:", error);
-        } finally {
-            alert('Login successful!');
-            console.log("Login successful!");
-            router.replace('keypad');
+            console.log("Unable to login: ", error);
         };
+    };
+
+    const signingUp = async () => {
+        try {
+            await supabase.auth.signUp({
+                phone: phoneNum,
+                password
+            });
+            console.log("Sign up successfully.");
+        } catch (error) {
+            console.log("Unable to register: ", error);
+        };
+
+        // const {error} = await supabase.auth.signUp({phone: phoneNum, password})
+
+        // if (error) {
+        //     alert(error)
+        // }
     };
 
     return (

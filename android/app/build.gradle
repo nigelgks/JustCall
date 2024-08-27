@@ -116,7 +116,6 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
-        manifestPlaceholders = [auth0Domain: "dev-fk04tshzl1blxaeq.us.auth0.com", auth0Scheme: "${applicationId}.auth0"]
     }
     signingConfigs {
         debug {
