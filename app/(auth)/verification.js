@@ -10,17 +10,38 @@ import { View,
          KeyboardAvoidingView,
          Platform
         } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router/build';
 import { supabase } from '../../supabase/supabase';
 
 const verification = () => {
     const router = useRouter();
-
-    const BaseURL = 'http://192.168.0.147:3000';
-
-    const { signIn, phoneNum, password } = useLocalSearchParams();
+    const { signIn, phoneNum, email, password } = useLocalSearchParams();
+    const [session, setSession] = useState(null);
     const [ code, setCode ] = useState(null);
+
+    useEffect(() => {
+        if (session) {
+            if (session.user.phone_confirmed_at) {
+                const signInDate = new Date(session.user.last_sign_in_at);
+                const confirmedDate = new Date(session.user.phone_confirmed_at);
+
+                if (signInDate > confirmedDate) {
+                    console.log(session.user.phone_confirmed_at);
+                    console.log('Logged in succesfully.')
+                    router.replace('keypad');
+                } else {
+                    console.log("Not verified yet.");
+                };
+            } else {
+                console.log("Not verified yet.");
+            }
+        } else {
+            console.log("No session.");
+            sendCode();
+        };
+    }, [session]);
 
     const hiddenNum = (phoneNum) => {
         lastNum = phoneNum.slice(9);
@@ -28,77 +49,58 @@ const verification = () => {
         return formattedNum;
     };
 
-    const sendCode = () => {
-        fetch(`${BaseURL}/verify/${phoneNum}`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-        })
-        .catch(err => {
-            alert(err);
-            console.log(err);
-        });
-    };
-
-    const checkCode = () => {
-        // fetch(`${BaseURL}/check/${phoneNum}/${code}`, {
-        //     method: 'GET',
-        //     headers: {
-        //       'Content-Type': 'application/json',
-        //     },
-        // })
-        // .then(res => res.json())
-        // .then(res => {
-        //     console.log(res);
-        //     if (res.status === 'approved') {
-        //         alert('Phone Verified');
-                
-        //         if (signIn == 'true') {
-        //             console.log('Logging in');
-        //             logIn();
-        //         } else {
-        //             console.log('Signing up');
-        //             signingUp();
-        //         }
-        //     } else {
-        //         alert('Verification failed try again!');
-        //         return false;
-        //     }
-        // });
-
+    const sendCode = async () => {
         if (signIn == 'true') {
-            console.log('Logging in');
-            logIn();
-        } else {
-            console.log('Signing up');
-            signingUp();
-        }
-    };
+            const {error} = await supabase.auth.signInWithOtp({
+                phone: phoneNum
+            });
 
-    const logIn = async () => {
-        try {
-            await supabase.auth.signInWithPassword({
+            if (error) {
+                console.log("Unable to send code: ", error);
+                alert('Invalid phone number.');
+                router.back();
+            } else {
+                console.log('Code sent successfully.')
+            };
+        } else {
+            const {error} = await supabase.auth.signUp({
                 phone: phoneNum,
                 password
             });
-            console.log("Logged in successfully.");
-            router.replace('keypad');
-        } catch (error) {
-            console.log("Unable to login: ", error);
+
+            if (error) {
+                console.log("Unable to send code: ", error);
+            } else {
+                console.log('Code sent successfully.')
+            };
         };
     };
 
-    const signingUp = async () => {
-        try {
-            await supabase.auth.signUp({
-                phone: phoneNum,
-                password
-            });
-            console.log("Sign up successfully.");
-            router.replace('keypad');
-        } catch (error) {
-            console.log("Unable to register: ", error);
+    const checkCode = async () => {
+        const {error} = await supabase.auth.verifyOtp({
+            phone: phoneNum,
+            token: code,
+            type: 'sms'
+        });
+
+        if (error) {
+            console.log("Unable to send code: ", error);
+        } else {
+            await addEmail();
+            const {data} = await supabase.auth.getSession();
+            setSession(data.session);
+        };
+    };
+
+    const addEmail = async () => {
+        const {error} = await supabase.auth.updateUser({
+            email
+        });
+
+        if (error) {
+            console.log('Unable to add email: ', error);
+        } else {
+            console.log('Email added successfully. Please check inbox to confirm.')
         };
     };
 
@@ -106,9 +108,13 @@ const verification = () => {
         <KeyboardAvoidingView
             keyboardVerticalOffset={-500}
             behavior={Platform.OS == "ios" ? "padding" : "height"}
-            style={{flex: 1, paddingTop: 35}}
+            style={{flex: 1, paddingTop: 50}}
         >
             <ScrollView>
+                <TouchableOpacity style={{paddingLeft: 10}} onPress={() => router.back()}>
+                    <Ionicons name="arrow-back-circle" size={40} color='black'/>
+                </TouchableOpacity>
+
                 <View style={styles.container}>
                     <Text style={styles.title}>Phone Number Verification</Text>
                     <Text style={styles.desc}>Verification code has been sent to you.</Text>
@@ -144,8 +150,8 @@ const verification = () => {
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     container: {

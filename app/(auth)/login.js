@@ -1,16 +1,25 @@
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { supabase } from '../../supabase/supabase';
 
 const Login = () => {
-  const v = 'abc@yahoo.com'
-  const x = '+600198486945';
+  const v = 'nigelgan@yahoo.com';
+  const x = '+600198781785';
   const y = '12345679';
 
   const [phoneNum, setPhoneNum] = useState('+60');
   const [password, setPassword] = useState('');
+  const [session, setSession] = useState(null);
 
   const router = useRouter();
+
+  useEffect(() => {
+    if (session) {
+      console.log('Login successful. Redirecting to main page.')
+      router.replace('keypad');
+    };
+  }, [session]);
 
   const handleChange = (text) => {
     if (text.startsWith('+60') && text.length <= 14) {
@@ -18,30 +27,78 @@ const Login = () => {
     };
   };
 
-  const handleLogin = () => {
-    if (phoneNum[3] == '1') {
-      formattedNum = phoneNum.slice(0,3) + '0' + phoneNum.slice(3);
-    } else {
-      formattedNum = phoneNum;
+  const formatNum = (num) => {
+    if (num[3] == '1') {
+      return (num.slice(0,3) + '0' + num.slice(3));
+    };
+    
+    return num;
+  };
+
+  const checkUserExist = async(num) => {
+    const {data, error} = await supabase
+      .from('auth.users')
+      .select('*')
+      .eq('phone');
+    
+    if (error) {
+      console.log(error);
+      return error;
     };
 
-    if (x == formattedNum && y == password) {
-      const signIn = true;
-      
-      const profile = {
-        signIn,
-        phoneNum: formattedNum,
+    return data;
+  }
+
+  const handleLogin = async () => {
+    const formattedNum = formatNum(phoneNum);
+
+    const {error} = await supabase.auth.signInWithPassword({
+        phone: formattedNum,
         password
-      };
+    });
+
+    if (error) {
+      console.log("Unable to login: ", error);
       
-      router.navigate({
-        pathname: 'verification',
-        params: profile
-      });
-    } else {
-      alert("User does not exist. Redirecting to registration.")
-      router.navigate('register');
-    }
+      if (error.message.includes('Invalid login credentials')) {
+        alert('Invalid login credentials.');
+      };
+    };
+
+    const {data} = await supabase.auth.getSession();
+    setSession(data.session);
+    setPhoneNum('+60');
+    setPassword('');
+
+    // } else {
+    //   alert("User does not exist. Redirecting to registration.");
+    //   router.navigate('identification');
+    // };
+  };
+
+  const handleRegister = async () => {
+    router.navigate('register');
+  };
+
+  const handleOTP = async () => {
+    const formattedNum = formatNum(phoneNum);
+
+    const signIn = true;
+    
+    const profile = {
+      signIn,
+      phoneNum: formattedNum
+    };
+    
+    router.navigate({
+      pathname: 'verification',
+      params: profile
+    });
+
+    // } else {
+    //   alert("User does not exist. Redirecting to registration.");
+    //   router.navigate('identification');
+    // };
 
     setPhoneNum('+60');
     setPassword('');
@@ -70,12 +127,29 @@ const Login = () => {
         onChangeText={(text) => setPassword(text)}
       />
       <TouchableOpacity
-        style={styles.button}
+        style={styles.loginButton}
         onPress={handleLogin}
         disabled={!phoneNum || !password}
       >
-        <Text style={styles.buttonText}>
-          Login
+        <Text style={styles.loginText}>
+          Login with password
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.registerButton}
+        onPress={handleRegister}
+      >
+        <Text style={styles.registerText}>
+          Sign up
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.otpButton}
+        onPress={handleOTP}
+        disabled={!phoneNum || !password}
+      >
+        <Text style={styles.otpText}>
+          Login with OTP instead
         </Text>
       </TouchableOpacity>
     </View>
@@ -86,6 +160,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    marginTop: 20,
     padding: 70
   },
   title: {
@@ -118,19 +193,48 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     marginBottom: 15
   },
-  button: {
+  loginButton: {
     width: '100%',
     height: 50,
     backgroundColor: 'black',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
-    marginTop: 15
+    marginTop: 15,
+    marginBottom: 20,
   },
-  buttonText: {
+  registerButton: {
+    width: '100%',
+    height: 50,
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: 'black',
+    marginBottom: 30,
+  },
+  otpButton: {
+    width: '100%',
+    backgroundColor: 'transparent',
+    borderColor: 'transparent',
+    alignSelf: 'center'
+  },
+  loginText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold'
+  },
+  registerText: {
+    color: 'black',
+    fontSize: 16,
+    fontWeight: 'bold'
+  },
+  otpText: {
+    textAlign: 'center', 
+    color: 'royalblue', 
+    fontWeight: '500', 
+    fontSize: 15
   }
 });
 

@@ -5,6 +5,8 @@ import { useRouter } from 'expo-router';
 
 const Register = () => {
   const [phoneNum, setPhoneNum] = useState('+60');
+  const [email, setEmail] = useState('');
+  const [emailMatch, setEmailMatch] = useState(true);
   const [password, setPassword] = useState('');
   const [confirmedPassword, setConfirmedPassword] = useState('');
   const [passwordLength, setPasswordLength] = useState(false);
@@ -12,10 +14,25 @@ const Register = () => {
 
   const router = useRouter();
 
+  const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   const handleChange = (text) => {
     if (text.startsWith('+60') && text.length <= 14) {
       setPhoneNum(text);
     };
+  };
+
+  const handleEmail = (text) => {
+    if (emailFormat.test(text)) {
+      setEmailMatch(true);
+    } else {
+      if (text.length > 0) {
+        setEmailMatch(false);
+      } else {
+        setEmailMatch(true);
+      };
+    };
+    setEmail(text);
   };
 
   const handlePassword = (text) => {
@@ -48,6 +65,7 @@ const Register = () => {
     const profile = {
       signIn,
       phoneNum: formattedNum,
+      email,
       password
     };
 
@@ -61,10 +79,10 @@ const Register = () => {
     <KeyboardAvoidingView 
       keyboardVerticalOffset={-500}
       behavior={Platform.OS == "ios" ? "padding" : "height"}
-      style={{flex: 1, paddingTop: 35}}
+      style={{flex: 1, paddingTop: 50}}
     >
       <ScrollView>
-        <TouchableOpacity style={{paddingLeft: 10}} onPress={() => router.navigate('login')}>
+        <TouchableOpacity style={{paddingLeft: 10}} onPress={() => router.back()}>
           <Ionicons name="arrow-back-circle" size={40} color='black'/>
         </TouchableOpacity>
 
@@ -78,9 +96,22 @@ const Register = () => {
             onChangeText={handleChange}
             keyboardType='phone-pad'
           />
+          <Text style={styles.inputTitle}>EMAIL</Text>
+          { emailMatch ? (
+            null
+          ) : <Text style={[styles.warnText, {color: 'red'}]}>Incorrect format.</Text>}
+          <TextInput
+            style={styles.input}
+            value={email}
+            placeholder='Email address'
+            onChangeText={handleEmail}
+            keyboardType='email-address'
+          />
           <Text style={styles.inputTitle}>PASSWORD</Text>
           { passwordLength ? (
-            <Text style={[styles.warnText, {color: 'red'}]}>Password must have 8 characters.</Text>
+            <Text style={[styles.warnText, {color: 'red'}]}>
+              Password must have 8 characters.
+            </Text>
           ) : null}
           <TextInput
             style={styles.input}
@@ -120,7 +151,10 @@ const Register = () => {
 const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
-    padding: 60
+    paddingLeft: 70,
+    paddingRight: 70,
+    paddingTop: 35,
+    paddingBottom: 50
   },
   title: {
     fontSize: 40,
