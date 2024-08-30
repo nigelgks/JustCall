@@ -4,10 +4,6 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import { supabase } from '../../supabase/supabase';
 
 const Login = () => {
-  const v = 'nigelgan@yahoo.com';
-  const x = '+600198781785';
-  const y = '12345679';
-
   const [phoneNum, setPhoneNum] = useState('+60');
   const [password, setPassword] = useState('');
   const [session, setSession] = useState(null);
@@ -35,20 +31,6 @@ const Login = () => {
     return num;
   };
 
-  const checkUserExist = async(num) => {
-    const {data, error} = await supabase
-      .from('auth.users')
-      .select('*')
-      .eq('phone');
-    
-    if (error) {
-      console.log(error);
-      return error;
-    };
-
-    return data;
-  }
-
   const handleLogin = async () => {
     const formattedNum = formatNum(phoneNum);
 
@@ -69,11 +51,6 @@ const Login = () => {
     setSession(data.session);
     setPhoneNum('+60');
     setPassword('');
-
-    // } else {
-    //   alert("User does not exist. Redirecting to registration.");
-    //   router.navigate('identification');
-    // };
   };
 
   const handleRegister = async () => {
@@ -94,11 +71,6 @@ const Login = () => {
       pathname: 'verification',
       params: profile
     });
-
-    // } else {
-    //   alert("User does not exist. Redirecting to registration.");
-    //   router.navigate('identification');
-    // };
 
     setPhoneNum('+60');
     setPassword('');

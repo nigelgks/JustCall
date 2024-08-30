@@ -8,7 +8,9 @@ import { View,
          TextInput,
          ScrollView,
          KeyboardAvoidingView,
-         Platform
+         Platform,
+         Modal,
+         ActivityIndicator
         } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,7 +21,8 @@ const verification = () => {
     const router = useRouter();
     const { signIn, phoneNum, email, password } = useLocalSearchParams();
     const [session, setSession] = useState(null);
-    const [ code, setCode ] = useState(null);
+    const [code, setCode] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (session) {
@@ -77,6 +80,8 @@ const verification = () => {
     };
 
     const checkCode = async () => {
+        setLoading(true);
+
         const {error} = await supabase.auth.verifyOtp({
             phone: phoneNum,
             token: code,
@@ -86,10 +91,17 @@ const verification = () => {
         if (error) {
             console.log("Unable to send code: ", error);
         } else {
-            await addEmail();
             const {data} = await supabase.auth.getSession();
+
+            if (signIn != 'true') {
+                await addEmail();
+                await addAccount(data.session.user.id);
+            };
+            
             setSession(data.session);
         };
+
+        setLoading(false);
     };
 
     const addEmail = async () => {
@@ -104,12 +116,47 @@ const verification = () => {
         };
     };
 
+    const addAccount = async (userID) => {
+        const addData = {
+            id: userID,
+            name: 'Nigel Gan',
+            address: '0x-abc123'
+        }
+        
+        const {error} = await supabase
+            .from('accounts')
+            .insert([addData])
+            .select();
+        
+        if (error) {
+            console.log('Unable to update user table:', error);
+        } else {
+            console.log('User table updated.');
+        };
+    };
+
     return (
         <KeyboardAvoidingView
             keyboardVerticalOffset={-500}
             behavior={Platform.OS == "ios" ? "padding" : "height"}
             style={{flex: 1, paddingTop: 50}}
         >
+            {loading && (
+                <Modal
+                    transparent={true}
+                    animationType='fade'
+                    visible={loading}
+                    onRequestClose={() => setLoading(false)}
+                >
+                    <View style={styles.modalBackground}>
+                        <View style={styles.loadingWrapper}>
+                            <ActivityIndicator size='large' color='white'/>
+                            <Text style={{color: 'white', fontWeight: '400'}}>Loading...</Text>
+                        </View>
+                    </View>
+                </Modal>
+            )}
+
             <ScrollView>
                 <TouchableOpacity style={{paddingLeft: 10}} onPress={() => router.back()}>
                     <Ionicons name="arrow-back-circle" size={40} color='black'/>
@@ -157,6 +204,21 @@ const styles = StyleSheet.create({
     container: {
         justifyContent: 'center',
         padding: 60
+    },
+    modalBackground: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+    },
+    loadingWrapper: {
+        backgroundColor: 'black',
+        height: 100,
+        width: 100,
+        borderRadius: 10,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     title: {
         fontSize: 40,

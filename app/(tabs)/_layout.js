@@ -1,6 +1,5 @@
 import React from 'react'
 import { Tabs } from 'expo-router'
-import AuthProvider from '../../providers/AuthProvider';
 
 const TabLayout = () => {
   return (
