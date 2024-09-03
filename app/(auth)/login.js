@@ -2,8 +2,11 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { supabase } from '../../supabase/supabase';
+import { useWeb3ModalAccount } from '@web3modal/ethers-react-native';
 
 const Login = () => {
+  const { address, chainId, isConnected } = useWeb3ModalAccount();
+
   const [phoneNum, setPhoneNum] = useState('+60');
   const [password, setPassword] = useState('');
   const [session, setSession] = useState(null);
@@ -32,48 +35,85 @@ const Login = () => {
   };
 
   const handleLogin = async () => {
-    const formattedNum = formatNum(phoneNum);
+    const data = await checkAddress('0x-abc12', false);
 
-    const {error} = await supabase.auth.signInWithPassword({
-        phone: formattedNum,
-        password
-    });
+    if (data != null && data.length > 0) {
+      const formattedNum = formatNum(phoneNum);
 
-    if (error) {
-      console.log("Unable to login: ", error);
-      
-      if (error.message.includes('Invalid login credentials')) {
-        alert('Invalid login credentials.');
+      const {error} = await supabase.auth.signInWithPassword({
+          phone: formattedNum,
+          password
+      });
+
+      if (error) {
+        console.log("Unable to login: ", error);
+        
+        if (error.message.includes('Invalid login credentials')) {
+          alert('Invalid login credentials.');
+        };
       };
-    };
 
-    const {data} = await supabase.auth.getSession();
-    setSession(data.session);
-    setPhoneNum('+60');
-    setPassword('');
+      const {data} = await supabase.auth.getSession();
+      setSession(data.session);
+      setPhoneNum('+60');
+      setPassword('');
+    };
+    
   };
 
   const handleRegister = async () => {
-    router.navigate('register');
+    const data = await checkAddress('0x-abc123', true);
+
+    if (data.length === 0) {
+      router.navigate('register');
+    } else if (data.length > 0) {
+      alert(`User wallet [${address}] is already registered. Please log in.`);
+    };
   };
 
   const handleOTP = async () => {
-    const formattedNum = formatNum(phoneNum);
+    const data = await checkAddress('0x-abc12', false);
 
-    const signIn = true;
-    
-    const profile = {
-      signIn,
-      phoneNum: formattedNum
+    if (data != null && data.length > 0) {
+      const formattedNum = formatNum(phoneNum);
+
+      const signIn = true;
+      
+      const profile = {
+        signIn,
+        phoneNum: formattedNum
+      };
+      
+      router.navigate({
+        pathname: 'verification',
+        params: profile
+      });
+
+      setPhoneNum('+60');
+      setPassword('');
     };
-    
-    router.navigate({
-      pathname: 'verification',
-      params: profile
-    });
+  };
 
-    setPhoneNum('+60');
-    setPassword('');
+  const checkAddress = async (addr, register) => {
+    const { data, error } = await supabase
+      .from('accounts')
+      .select('*')
+      .like('address', addr);
+
+    if (error) {
+      console.log("Unable to search address: ", error);
+      return null;
+    } else if (data.length === 0) {
+      console.log('No address found in database.');
+      if (register == false) {
+        alert('Address does not exist in database. Please select another wallet.');
+        router.back();
+      };
+      return data;
+    } else {
+      console.log('Address found in database:', data);
+      return data;
+    };
   };
 
   return (

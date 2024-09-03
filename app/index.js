@@ -13,7 +13,7 @@ const StartPage = () => {
     };
 
     if (!session) {
-        return <Redirect href="login" />;
+        return <Redirect href="wallet" />;
     };
 
     return <Redirect href="keypad" />;

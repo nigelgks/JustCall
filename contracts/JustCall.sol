@@ -10,7 +10,7 @@ contract JustCall {
         string phoneNumber;
     }
 
-    mapping(string => string fullName) private users;
+    mapping(string => string) private users;
     mapping(address => Profile) private profile;
 
     //Initialize contract owner
@@ -44,7 +44,7 @@ contract JustCall {
     }
 
     //Validate address exist
-    modifier validateAddressLookup {
+    modifier validateAddressLookup() {
         require(profile[msg.sender].addr != address(0), "User does not exist.");
         _;
     }

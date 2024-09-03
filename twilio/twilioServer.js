@@ -1,6 +1,8 @@
-const accountSid = 'AC42d07a220565fa42b7e322978222ac94'
-const authToken = '90179d7bae57116cf8dc885e8fbd58f8'
-const serviceId = 'VA53d1b760838a60494f3f471206b59c27'
+import Config from 'react-native-config';
+
+const accountSid = Config.TWILIO_SID;
+const authToken = Config.TWILIO_AUTHTOKEN;
+const serviceId = Config.TWILIO_SERVICEID;
 const twilio = require('twilio')
 const client = new twilio(accountSid, authToken)
 

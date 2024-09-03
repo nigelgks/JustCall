@@ -17,7 +17,7 @@ const profile = () => {
       setLoading(false);
       console.log("Signed out successfully.");
       alert("Signed out successfully.")
-      router.replace('login');
+      router.replace('wallet');
     } catch (error) {
         console.log("Unable to sign out: ", error);
     };

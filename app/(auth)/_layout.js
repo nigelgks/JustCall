@@ -9,6 +9,7 @@ const AuthLayout = () => {
       <Stack.Screen name="register"/>
       <Stack.Screen name="verification"/>
       <Stack.Screen name="identification"/>
+      <Stack.Screen name="wallet"/>
     </Stack>
   );
 };
