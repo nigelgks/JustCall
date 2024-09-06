@@ -2,10 +2,11 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { supabase } from '../../supabase/supabase';
+import '@walletconnect/react-native-compat';
 import { useWeb3ModalAccount } from '@web3modal/ethers-react-native';
 
 const Login = () => {
-  const { address, chainId, isConnected } = useWeb3ModalAccount();
+  const { address } = useWeb3ModalAccount();
 
   const [phoneNum, setPhoneNum] = useState('+60');
   const [password, setPassword] = useState('');
@@ -15,7 +16,7 @@ const Login = () => {
 
   useEffect(() => {
     if (session) {
-      console.log('Login successful. Redirecting to main page.')
+      console.log('Login successful. Redirecting to main page.');
       router.replace('keypad');
     };
   }, [session]);
@@ -35,7 +36,7 @@ const Login = () => {
   };
 
   const handleLogin = async () => {
-    const data = await checkAddress('0x-abc12', false);
+    const data = await checkAddress(address, false);
 
     if (data != null && data.length > 0) {
       const formattedNum = formatNum(phoneNum);
@@ -58,21 +59,20 @@ const Login = () => {
       setPhoneNum('+60');
       setPassword('');
     };
-    
   };
 
   const handleRegister = async () => {
-    const data = await checkAddress('0x-abc123', true);
+    const data = await checkAddress(address, true);
 
     if (data.length === 0) {
-      router.navigate('register');
+      router.navigate('identification');
     } else if (data.length > 0) {
       alert(`User wallet [${address}] is already registered. Please log in.`);
     };
   };
 
   const handleOTP = async () => {
-    const data = await checkAddress('0x-abc12', false);
+    const data = await checkAddress(address, false);
 
     if (data != null && data.length > 0) {
       const formattedNum = formatNum(phoneNum);
@@ -165,7 +165,7 @@ const Login = () => {
         </Text>
       </TouchableOpacity>
     </View>
-  )
+  );
 };
 
 const styles = StyleSheet.create({

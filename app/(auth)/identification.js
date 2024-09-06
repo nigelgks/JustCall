@@ -12,7 +12,7 @@ const identification = () => {
   };
 
   return (
-    <View style={{flex: 1, paddingTop: 35}}>
+    <View style={{flex: 1, paddingTop: 50}}>
       <TouchableOpacity style={{paddingLeft: 10}} onPress={() => router.navigate('login')}>
         <Ionicons name="arrow-back-circle" size={40} color='black'/>
       </TouchableOpacity>
@@ -45,8 +45,8 @@ const identification = () => {
         </TouchableOpacity>
       </View>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -104,6 +104,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold'
   }
-})
+});
 
-export default identification
+export default identification;

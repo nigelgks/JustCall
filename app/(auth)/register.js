@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View,
+         Text,
+         TouchableOpacity,
+         StyleSheet,
+         TextInput,
+         KeyboardAvoidingView,
+         Platform,
+         ScrollView
+        } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -58,7 +66,7 @@ const Register = () => {
       formattedNum = phoneNum.slice(0,3) + '0' + phoneNum.slice(3);
     } else {
       formattedNum = phoneNum;
-    }
+    };
 
     const signIn = false;
     
@@ -145,8 +153,8 @@ const Register = () => {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -199,4 +207,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Register
+export default Register;

@@ -12,16 +12,21 @@ import { View,
          Modal,
          ActivityIndicator
         } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router/build';
 import { supabase } from '../../supabase/supabase';
+import '@walletconnect/react-native-compat';
+import { useWeb3ModalAccount } from '@web3modal/ethers-react-native';
 
 const verification = () => {
     const router = useRouter();
+
     const { signIn, phoneNum, email, password } = useLocalSearchParams();
+    const { address } = useWeb3ModalAccount();
+
+    let code = useRef(null);
     const [session, setSession] = useState(null);
-    const [code, setCode] = useState(null);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -32,14 +37,14 @@ const verification = () => {
 
                 if (signInDate > confirmedDate) {
                     console.log(session.user.phone_confirmed_at);
-                    console.log('Logged in succesfully.')
+                    console.log('Logged in succesfully.');
                     router.replace('keypad');
                 } else {
                     console.log("Not verified yet.");
                 };
             } else {
                 console.log("Not verified yet.");
-            }
+            };
         } else {
             console.log("No session.");
             sendCode();
@@ -63,7 +68,7 @@ const verification = () => {
                 alert('Invalid phone number.');
                 router.back();
             } else {
-                console.log('Code sent successfully.')
+                console.log('Code sent successfully.');
             };
         } else {
             const {error} = await supabase.auth.signUp({
@@ -74,7 +79,7 @@ const verification = () => {
             if (error) {
                 console.log("Unable to send code: ", error);
             } else {
-                console.log('Code sent successfully.')
+                console.log('Code sent successfully.');
             };
         };
     };
@@ -95,7 +100,7 @@ const verification = () => {
 
             if (signIn != 'true') {
                 await addEmail();
-                await addAccount(data.session.user.id);
+                await addAccount(data.session.user.id, address);
             };
             
             setSession(data.session);
@@ -112,16 +117,16 @@ const verification = () => {
         if (error) {
             console.log('Unable to add email: ', error);
         } else {
-            console.log('Email added successfully. Please check inbox to confirm.')
+            console.log('Email added successfully. Please check inbox to confirm.');
         };
     };
 
-    const addAccount = async (userID) => {
+    const addAccount = async (userID, addr) => {
         const addData = {
             id: userID,
             name: 'Nigel Gan',
-            address: '0x-abc123'
-        }
+            address: addr
+        };
         
         const {error} = await supabase
             .from('accounts')
@@ -174,9 +179,18 @@ const verification = () => {
                         style={styles.input}
                         value={code}
                         placeholder='XXX-XXX'
-                        onChangeText={(text) => setCode(text)}
+                        onChangeText={(text) => (code = text)}
                         keyboardType='numeric'
                     />
+
+                    {/* <View>
+                        <OTPTextView
+                            containerStyle={{width: '10%'}}
+                            inputCount={6}
+                            ref={text => (code = text)}
+                        />
+                    </View> */}
+                    
                     <TouchableOpacity
                         style={styles.pressable}
                         onPress={sendCode}
@@ -259,6 +273,10 @@ const styles = StyleSheet.create({
         paddingLeft: 10,
         marginBottom: 15
     },
+    otpInput: {
+        width: '90%',
+        marginBottom: 20
+    },
     pressable: {
         width: '50%',
         marginBottom: 10,
@@ -282,4 +300,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default verification
+export default verification;

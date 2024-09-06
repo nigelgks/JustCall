@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import Config from "react-native-config";
 import '@walletconnect/react-native-compat';
-import { createWeb3Modal, defaultConfig, useWalletInfo, useWeb3ModalAccount, Web3Modal } from '@web3modal/ethers-react-native';
+import { createWeb3Modal,
+         defaultConfig,
+         useWeb3ModalAccount,
+         Web3Modal
+        } from '@web3modal/ethers-react-native';
 import { W3mButton } from '@web3modal/ethers-react-native';
 import { useRouter } from 'expo-router';
 
@@ -25,7 +29,7 @@ const mainnet = {
     currency: 'ETH',
     explorerUrl: 'https://etherscan.io',
     rpcUrl: 'https://mainnet.infura.io/v3/6ec31da19e8b4d44a456b8ed4b8a6846'
-}
+};
 
 const sepolia = {
   chainId: 11155111,
@@ -33,9 +37,9 @@ const sepolia = {
   currency: 'ETH',
   explorerUrl: 'https://sepolia.etherscan.io',
   rpcUrl: 'https://sepolia.infura.io/v3/6ec31da19e8b4d44a456b8ed4b8a6846'
-}
+};
   
-const chains = [mainnet, sepolia]
+const chains = [mainnet, sepolia];
 
 createWeb3Modal({
     projectId,
@@ -59,15 +63,15 @@ const wallet = () => {
       <Web3Modal/>
       <W3mButton balance='show'/>
       <TouchableOpacity 
-        style={styles.button}
+        style={[styles.button, {backgroundColor: isConnected ? 'black' : 'grey'}]}
         onPress={handleContinue}
         disabled={!isConnected}
       >
         <Text style={styles.textButton}>Continue</Text>
       </TouchableOpacity>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -93,18 +97,17 @@ const styles = StyleSheet.create({
   },
   button: {
     width: '100%',
-    height: 50,
-    backgroundColor: 'black',
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8,
-    marginTop: 35
+    borderRadius: 35,
+    marginTop: 25
   },
   textButton: {
     color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold'
+    fontSize: 15,
+    fontWeight: '400'
   }
 });
 
-export default wallet
+export default wallet;
