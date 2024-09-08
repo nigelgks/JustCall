@@ -1,6 +1,3 @@
-// UPDATE THE CODE INPUT TO SOMETHING BETTER
-// AND LIMIT TO 6 CHARACTERS ONLY
-
 import { View,
          Text,
          StyleSheet,
@@ -12,7 +9,7 @@ import { View,
          Modal,
          ActivityIndicator
         } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router/build';
 import { supabase } from '../../supabase/supabase';
@@ -25,8 +22,9 @@ const verification = () => {
     const { signIn, phoneNum, email, password } = useLocalSearchParams();
     const { address } = useWeb3ModalAccount();
 
-    let code = useRef(null);
+    const [code, setCode] = useState('');
     const [session, setSession] = useState(null);
+    const [disable, setDisable] = useState(true);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -50,6 +48,17 @@ const verification = () => {
             sendCode();
         };
     }, [session]);
+
+    const handleOTP = (text) => {
+        if (text.length < 7) {
+            setCode(text);
+            if (text.length == 6) {
+                setDisable(false);
+            } else {
+                setDisable(true);
+            };
+        };
+    };
 
     const hiddenNum = (phoneNum) => {
         lastNum = phoneNum.slice(9);
@@ -95,6 +104,7 @@ const verification = () => {
 
         if (error) {
             console.log("Unable to send code: ", error);
+            alert('Code entered is invalid or has expired.');
         } else {
             const {data} = await supabase.auth.getSession();
 
@@ -125,7 +135,8 @@ const verification = () => {
         const addData = {
             id: userID,
             name: 'Nigel Gan',
-            address: addr
+            address: addr,
+            phone: phoneNum
         };
         
         const {error} = await supabase
@@ -179,17 +190,9 @@ const verification = () => {
                         style={styles.input}
                         value={code}
                         placeholder='XXX-XXX'
-                        onChangeText={(text) => (code = text)}
+                        onChangeText={handleOTP}
                         keyboardType='numeric'
                     />
-
-                    {/* <View>
-                        <OTPTextView
-                            containerStyle={{width: '10%'}}
-                            inputCount={6}
-                            ref={text => (code = text)}
-                        />
-                    </View> */}
                     
                     <TouchableOpacity
                         style={styles.pressable}
@@ -200,9 +203,9 @@ const verification = () => {
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={styles.button}
+                        style={[styles.button, {backgroundColor: disable ? 'gray' : 'black'}]}
                         onPress={checkCode}
-                        disabled={!code}
+                        disabled={disable}
                     >
                         <Text style={styles.buttonText}>
                         Next
@@ -287,7 +290,6 @@ const styles = StyleSheet.create({
     button: {
         width: '100%',
         height: 50,
-        backgroundColor: 'black',
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 8,

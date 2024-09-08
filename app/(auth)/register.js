@@ -10,6 +10,7 @@ import { View,
         } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { supabase } from '../../supabase/supabase';
 
 const Register = () => {
   const [phoneNum, setPhoneNum] = useState('+60');
@@ -61,26 +62,54 @@ const Register = () => {
     setConfirmedPassword(text);
   };
 
-  const handleButtonPress = () => {
+  const handleButtonPress = async () => {
     if (phoneNum[3] == '1') {
       formattedNum = phoneNum.slice(0,3) + '0' + phoneNum.slice(3);
     } else {
       formattedNum = phoneNum;
     };
 
-    const signIn = false;
-    
-    const profile = {
-      signIn,
-      phoneNum: formattedNum,
-      email,
-      password
-    };
+    const data = await checkPhoneNum(formattedNum);
 
-    router.navigate({
-      pathname: 'verification',
-      params: profile
-    });
+    console.log(data);
+
+    if (data.length == 0) {
+      const signIn = false;
+      
+      const profile = {
+        signIn,
+        phoneNum: formattedNum,
+        email,
+        password
+      };
+  
+      router.navigate({
+        pathname: 'verification',
+        params: profile
+      });
+    };
+  };
+
+  const checkPhoneNum = async (phone) => {
+    console.log(phone);
+
+    const { data, error } = await supabase
+      .from('accounts')
+      .select('*')
+      .like('phone', phone);
+
+    if (error) {
+      console.log("Unable to search phone number: ", error);
+      return null;
+    } else if (data.length === 0) {
+      console.log('No phone found in database.');
+      return data;
+    } else {
+      console.log('Phone number already registered.');
+      alert('Phone number already registered. Please login.');
+      router.navigate('login');
+      return data;
+    };
   };
 
   return (
@@ -142,9 +171,14 @@ const Register = () => {
             onChangeText={handleConfirmPassword}
           />
           <TouchableOpacity
-            style={styles.button}
+            style={[styles.button, {
+              backgroundColor: 
+                (!phoneNum || !password || !confirmedPassword || !emailMatch || !email) ?
+                'gray' :
+                'black'
+            }]}
             onPress={handleButtonPress}
-            disabled={!phoneNum || !password || !confirmedPassword}
+            disabled={!phoneNum || !password || !confirmedPassword || !emailMatch || !email}
           >
             <Text style={styles.buttonText}>
               Next
@@ -194,7 +228,6 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     height: 50,
-    backgroundColor: 'black',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,

@@ -19,10 +19,14 @@ const profile = () => {
   const router = useRouter();
 
   const [email, setEmail] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [emailMatch, setEmailMatch] = useState(true);
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   useEffect(() => {
     const fetchSessionData = async () => {
@@ -33,6 +37,9 @@ const profile = () => {
     };
 
     if (session) {
+      if (!session.user.email) {
+        alert('Please confirm your email. Check your inbox.');
+      };
       setEmail(session.user.email);
       setPhone(session.user.phone);
     } else {
@@ -57,13 +64,26 @@ const profile = () => {
     getName();
   }, [address]);
 
+  const handleEmail = (text) => {
+    if (emailFormat.test(text)) {
+      setEmailMatch(true);
+    } else {
+      if (text.length > 0) {
+        setEmailMatch(false);
+      } else {
+        setEmailMatch(true);
+      };
+    };
+    setNewEmail(text);
+  };
+
   const handleLogout = async () => {
     try {
       setLoading(true);
       await supabase.auth.signOut();
       setLoading(false);
       console.log("Signed out successfully.");
-      alert("Signed out successfully.")
+      alert("Signed out successfully.");
       router.replace('wallet');
     } catch (error) {
         console.log("Unable to sign out: ", error);
@@ -99,10 +119,14 @@ const profile = () => {
             editable={false}
           />
           <Text style={styles.inputTitle}>EMAIL</Text>
+          { emailMatch ? (
+            null
+          ) : <Text style={[styles.warnText, {color: 'red'}]}>Incorrect format.</Text>}
           <TextInput
             style={styles.input}
-            value={email}
-            onChangeText={(text) => setEmail(text)}
+            placeholder={email}
+            value={newEmail}
+            onChangeText={handleEmail}
             keyboardType='email-address'
           />
           <Text style={styles.inputTitle}>ADDRESS</Text>
@@ -113,10 +137,19 @@ const profile = () => {
           />
 
           <TouchableOpacity
-            style={styles.confirmButton}
-            onPress={handleLogout}
+            style={[styles.confirmButton, 
+              {
+                borderColor: (!newEmail || newEmail === email || !emailMatch) ? 'gray' : 'black'
+              }
+            ]}
+            disabled={!newEmail || newEmail === email || !emailMatch}
           >
-            <Text style={styles.buttonText}>Confirm changes</Text>
+            <Text style={[styles.buttonText, 
+              {
+                color: (!newEmail || newEmail === email || !emailMatch) ? 'gray' : 'black'
+              }
+            ]}
+            >Confirm changes</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.deleteButton}
@@ -162,13 +195,16 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     marginBottom: 15
   },
+  warnText: {
+    fontSize: 9,
+    paddingBottom: 5
+  },
   confirmButton: {
     width: '100%',
     height: 50,
     backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
-    borderColor: 'black',
     borderWidth: 2,
     borderRadius: 8,
     marginTop: 15
