@@ -6,14 +6,25 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "SUPABASE_URL": "https://vjjffydbwvxufgkskepq.supabase.co",
+        "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqamZmeWRid3Z4dWZna3NrZXBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ3MjUyNDgsImV4cCI6MjA0MDMwMTI0OH0.ueA-Simrx4gYeD65rRptGfPMH58mQF0kSfcQuHN2E_A",
+        "WALLETCONNECT_PROJECT_ID": "ddc0ae841084e2e308c788df1e9cd794"
+      }
     },
     "preview": {
+      "developmentClient": true,
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease"
       },
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "SUPABASE_URL": "https://vjjffydbwvxufgkskepq.supabase.co",
+        "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqamZmeWRid3Z4dWZna3NrZXBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ3MjUyNDgsImV4cCI6MjA0MDMwMTI0OH0.ueA-Simrx4gYeD65rRptGfPMH58mQF0kSfcQuHN2E_A",
+        "WALLETCONNECT_PROJECT_ID": "ddc0ae841084e2e308c788df1e9cd794"
+      }
     },
     "production": {
       "autoIncrement": true

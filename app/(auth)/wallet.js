@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
-import Config from "react-native-config";
 import '@walletconnect/react-native-compat';
 import { createWeb3Modal,
          defaultConfig,
@@ -11,7 +10,7 @@ import { createWeb3Modal,
 import { W3mButton } from '@web3modal/ethers-react-native';
 import { useRouter } from 'expo-router';
 
-const projectId = Config.WALLETCONNECT_PROJECT_ID;
+const projectId = process.env.EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID;
 const metadata = {
     name: 'JustCall',
     description: 'JustCall Dapp',

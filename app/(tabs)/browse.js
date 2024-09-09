@@ -16,13 +16,6 @@ const browse = () => {
   const [contacts, setContacts] = useState(null);
   const [filteredcontactLists, setFilteredcontactLists] = useState(null);
 
-  const contactLists = [
-    { id: '1', name: 'John Doe', phone: '123-456-7890' },
-    { id: '2', name: 'Jane Smith', phone: '987-654-3210' },
-    { id: '3', name: 'Samuel Adams', phone: '456-789-0123' },
-    { id: '4', name: 'Alice Brown', phone: '654-321-0987' },
-  ];
-
   useEffect(() => {
     const requestPermission = async () => {
       if (Platform.OS === 'android') {
@@ -47,7 +40,7 @@ const browse = () => {
     setSearch(text);
     if (text) {
       const filteredData = contacts.filter(contacts =>
-        contacts.phoneNumbers[0].number.includes(text)
+        contacts.phoneNumbers.length > 0 && contacts.phoneNumbers[0].number.includes(text)
       );
       setFilteredcontactLists(filteredData);
     } else {
@@ -72,7 +65,7 @@ const browse = () => {
         {filteredcontactLists ? (
           <FlatList
             data={filteredcontactLists}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.rawContactId}
             renderItem={({ item }) => (
               <TouchableOpacity style={styles.contactListItem} disabled={true}>
                 <Text style={styles.contactListName}>{item.givenName}</Text>
@@ -136,7 +129,8 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   bottomContainer: {
-    alignItems: 'stretch'
+    alignItems: 'stretch',
+    marginBottom: 125
   },
   image: {
     width: '100%',
