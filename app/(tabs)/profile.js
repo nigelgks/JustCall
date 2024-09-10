@@ -13,12 +13,14 @@ import { useRouter } from 'expo-router';
 import '@walletconnect/react-native-compat';
 import { useWeb3ModalAccount } from '@web3modal/ethers-react-native';
 import { AntDesign } from '@expo/vector-icons';
+import Octicons from '@expo/vector-icons/Octicons';
 
 const profile = () => {
   const { address } = useWeb3ModalAccount();
   const router = useRouter();
 
   const [email, setEmail] = useState('');
+  const [emailConfirmed, setEmailConfirmed] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [emailMatch, setEmailMatch] = useState(true);
   const [phone, setPhone] = useState('');
@@ -42,6 +44,7 @@ const profile = () => {
       };
       setEmail(session.user.email);
       setPhone(session.user.phone);
+      setEmailConfirmed(session.user.email_confirmed_at);
     } else {
       fetchSessionData();
     };
@@ -94,18 +97,33 @@ const profile = () => {
     <KeyboardAvoidingView
       keyboardVerticalOffset={-500}
       behavior={Platform.OS == "ios" ? "padding" : "height"}
-      style={{flex: 1, paddingTop: 70}}
+      style={styles.mainContainer}
     >
-      <ScrollView>
-        <View style={styles.header}>
-          <Text style={styles.title}>Profile</Text>
-          <TouchableOpacity onPress={handleLogout}>
-              <AntDesign name="logout" size={25} color="black"/>
-          </TouchableOpacity>
-        </View>
-        
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.topContainer}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Profile</Text>
+            <TouchableOpacity onPress={handleLogout}>
+                <AntDesign name="logout" size={25} color="black"/>
+            </TouchableOpacity>
+          </View>
 
-        <View style={styles.container}>
+          <View style={[styles.verifyBox, {
+            backgroundColor: (emailConfirmed) ? 'darkcyan' : 'orange'
+          }]}>
+            {emailConfirmed ? (
+              <>
+                <Octicons name="verified" size={24} color="white" />
+                <Text style={[styles.verifyText, {color: 'white'}]}>Account verified.</Text>
+              </>
+            ) : (
+              <>
+                <Octicons name="unverified" size={24} color="black" />
+                <Text style={styles.verifyText}>Account unverified.</Text>
+              </>
+            )}
+          </View>
+
           <Text style={styles.inputTitle}>NAME</Text>
           <TextInput
             style={[styles.input, {backgroundColor: 'lightgray'}]}
@@ -118,33 +136,38 @@ const profile = () => {
             placeholder={phone ? `+${phone}` : ''}
             editable={false}
           />
-          <Text style={styles.inputTitle}>EMAIL</Text>
-          { emailMatch ? (
-            null
-          ) : <Text style={[styles.warnText, {color: 'red'}]}>Incorrect format.</Text>}
-          <TextInput
-            style={styles.input}
-            placeholder={email}
-            value={newEmail}
-            onChangeText={handleEmail}
-            keyboardType='email-address'
-          />
-          <Text style={styles.inputTitle}>ADDRESS</Text>
+          <Text style={styles.inputTitle}>WALLET ADDRESS</Text>
           <TextInput
             style={[styles.input, {backgroundColor: 'lightgray'}]}
             placeholder={address}
             editable={false}
           />
+          <Text style={styles.inputTitle}>EMAIL ADDRESS</Text>
+          { emailMatch ? (
+            null
+          ) : <Text style={[styles.warnText, {color: 'red'}]}>Incorrect format.</Text>}
+          <TextInput
+            style={[styles.input, {
+              borderColor: (emailConfirmed) ? 'gray' : 'darkred',
+              borderWidth: (emailConfirmed) ? 1 : 2
+            }]}
+            placeholder={(emailConfirmed) ? email : 'Please confirm your email.'}
+            value={newEmail}
+            onChangeText={handleEmail}
+            keyboardType='email-address'
+          />
+        </View>
 
+        <View style={styles.buttonContainer}>
           <TouchableOpacity
-            style={[styles.confirmButton, 
+            style={[styles.confirmButton,
               {
                 borderColor: (!newEmail || newEmail === email || !emailMatch) ? 'gray' : 'black'
               }
             ]}
             disabled={!newEmail || newEmail === email || !emailMatch}
           >
-            <Text style={[styles.buttonText, 
+            <Text style={[styles.buttonText,
               {
                 color: (!newEmail || newEmail === email || !emailMatch) ? 'gray' : 'black'
               }
@@ -164,20 +187,38 @@ const profile = () => {
 };
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    paddingTop: 70,
+    paddingHorizontal: 20
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingBottom: 20,
-    paddingHorizontal: 20,
+    paddingBottom: 25,
   },
-  container: {
+  topContainer: {
     flex: 1,
-    paddingHorizontal: 20
+    paddingBottom: 45
   },
   title: {
     fontSize: 30,
     fontWeight: 'bold'
+  },
+  verifyBox: {
+    height: 65,
+    flexDirection: 'row',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 25,
+    elevation: 1
+  },
+  verifyText: {
+    fontSize: 16,
+    fontWeight: '500',
+    paddingLeft: 8
   },
   inputTitle: {
     fontSize: 14,
@@ -189,15 +230,17 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     height: 50,
-    borderColor: 'gray',
-    borderWidth: 1,
     borderRadius: 8,
     paddingLeft: 10,
-    marginBottom: 15
+    marginBottom: 25
   },
   warnText: {
     fontSize: 9,
     paddingBottom: 5
+  },
+  buttonContainer: {
+    flex: 1,
+    justifyContent: 'flex-end'
   },
   confirmButton: {
     width: '100%',
@@ -206,22 +249,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderRadius: 8,
-    marginTop: 15
+    borderRadius: 8
   },
   deleteButton: {
     width: '100%',
     height: 50,
-    backgroundColor: 'darkred',
+    backgroundColor: 'black',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
-    marginTop: 15,
-    marginBottom: 20,
+    marginTop: 12,
+    marginBottom: 20
   },
   buttonText: {
     fontWeight: 'bold',
-    fontSize: 16
+    fontSize: 15
   }
 });
 

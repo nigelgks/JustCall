@@ -118,7 +118,7 @@ const Register = () => {
       behavior={Platform.OS == "ios" ? "padding" : "height"}
       style={{flex: 1, paddingTop: 50}}
     >
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <TouchableOpacity style={{paddingLeft: 10}} onPress={() => router.back()}>
           <Ionicons name="arrow-back-circle" size={40} color='black'/>
         </TouchableOpacity>

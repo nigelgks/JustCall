@@ -134,7 +134,7 @@ const verification = () => {
     const addAccount = async (userID, addr) => {
         const addData = {
             id: userID,
-            name: 'Nigel Gan',
+            name: 'JOHN DOE',
             address: addr,
             phone: phoneNum
         };
@@ -173,7 +173,7 @@ const verification = () => {
                 </Modal>
             )}
 
-            <ScrollView>
+            <ScrollView showsVerticalScrollIndicator={false}>
                 <TouchableOpacity style={{paddingLeft: 10}} onPress={() => router.back()}>
                     <Ionicons name="arrow-back-circle" size={40} color='black'/>
                 </TouchableOpacity>

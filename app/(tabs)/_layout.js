@@ -23,7 +23,7 @@ const TabLayout = () => {
             focused ? (
               <Ionicons name="search-circle-sharp" size={30} color="black" />
             ) : (
-              <Ionicons name="search-circle-outline" size={30} color="black" />
+              <Ionicons name="search-circle-outline" size={30} color="gray" />
             )
           )
         }}
@@ -35,7 +35,7 @@ const TabLayout = () => {
             focused ? (
               <Ionicons name="keypad" size={25} color="black" />
             ) : (
-              <Ionicons name="keypad-outline" size={25} color="black" />
+              <Ionicons name="keypad-outline" size={25} color="gray" />
             )
           )
         }}
@@ -47,7 +47,7 @@ const TabLayout = () => {
             focused ? (
               <Ionicons name="person-circle-sharp" size={30} color="black" />
             ) : (
-              <Ionicons name="person-circle-outline" size={30} color="black" />
+              <Ionicons name="person-circle-outline" size={30} color="gray" />
             )
           )
         }}
