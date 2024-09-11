@@ -173,12 +173,12 @@ const Register = () => {
           <TouchableOpacity
             style={[styles.button, {
               backgroundColor: 
-                (!phoneNum || !password || !confirmedPassword || !emailMatch || !email) ?
+                (!phoneNum || !password || !confirmedPassword || !emailMatch || !email || !passwordMatch) ?
                 'gray' :
                 'black'
             }]}
             onPress={handleButtonPress}
-            disabled={!phoneNum || !password || !confirmedPassword || !emailMatch || !email}
+            disabled={!phoneNum || !password || !confirmedPassword || !emailMatch || !passwordMatch}
           >
             <Text style={styles.buttonText}>
               Next

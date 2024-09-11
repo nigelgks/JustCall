@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, ActivityIndicator } from 'react-native';
 import { supabase } from '../../supabase/supabase';
 import '@walletconnect/react-native-compat';
 import { useWeb3ModalAccount } from '@web3modal/ethers-react-native';
@@ -11,6 +11,7 @@ const Login = () => {
   const [phoneNum, setPhoneNum] = useState('+60');
   const [password, setPassword] = useState('');
   const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
 
@@ -36,6 +37,7 @@ const Login = () => {
   };
 
   const handleLogin = async () => {
+    setLoading(true);
     const data = await checkAddress(address, false);
 
     if (data != null && data.length > 0) {
@@ -59,6 +61,7 @@ const Login = () => {
       setPhoneNum('+60');
       setPassword('');
     };
+    setLoading(false);
   };
 
   const handleRegister = async () => {
@@ -118,6 +121,22 @@ const Login = () => {
 
   return (
     <View style={styles.container}>
+      {loading && (
+        <Modal
+          transparent={true}
+          animationType='fade'
+          visible={loading}
+          onRequestClose={() => setLoading(false)}
+      >
+          <View style={styles.modalBackground}>
+            <View style={styles.loadingWrapper}>
+              <ActivityIndicator size='large' color='white'/>
+              <Text style={{color: 'white', fontWeight: '400'}}>Loading...</Text>
+            </View>
+          </View>
+        </Modal>
+      )}
+
       <Text style={styles.title}>Login</Text>
       <Text style={styles.desc}>Sign in to continue.</Text>
 
@@ -174,6 +193,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 20,
     padding: 70
+  },
+  modalBackground: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)'
+  },
+  loadingWrapper: {
+      backgroundColor: 'black',
+      height: 100,
+      width: 100,
+      borderRadius: 10,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
   },
   title: {
     fontSize: 40,

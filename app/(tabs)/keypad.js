@@ -61,15 +61,15 @@ const keypad = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     paddingHorizontal: 10,
-    paddingTop: 100
+    paddingBottom: 30
   },
   input: {
     fontSize: 45,
     fontWeight: 'bold',
-    marginBottom: 30,
+    marginBottom: 50,
     textAlign: 'center',
   },
   keypad: {

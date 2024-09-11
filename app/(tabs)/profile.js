@@ -6,7 +6,8 @@ import { View,
          StyleSheet,
          TextInput,
          KeyboardAvoidingView,
-         ScrollView
+         ScrollView,
+         Modal
         } from 'react-native';
 import { supabase } from '../../supabase/supabase';
 import { useRouter } from 'expo-router';
@@ -42,9 +43,13 @@ const profile = () => {
       if (!session.user.email) {
         alert('Please confirm your email. Check your inbox.');
       };
+
       setEmail(session.user.email);
       setPhone(session.user.phone);
-      setEmailConfirmed(session.user.email_confirmed_at);
+
+      if (session.user.new_email) {
+        setEmailConfirmed(session.user.new_email);
+      };
     } else {
       fetchSessionData();
     };
@@ -80,6 +85,25 @@ const profile = () => {
     setNewEmail(text);
   };
 
+  const handleChange = async () => {
+    setLoading(true);
+    console.log(`Changing to ${newEmail}.`);
+    
+    const { error } = await supabase.auth.updateUser({
+      email: newEmail
+    });
+
+    if (error) {
+      console.log('Unable to add email: ', error);
+    } else {
+      console.log('Email updated successfully. Please check inbox to confirm.');
+      alert('Email change confirmation sent to your inbox. Please check both inbox.');
+    };
+
+    setNewEmail('');
+    setLoading(false);
+  };
+
   const handleLogout = async () => {
     try {
       setLoading(true);
@@ -99,6 +123,22 @@ const profile = () => {
       behavior={Platform.OS == "ios" ? "padding" : "height"}
       style={styles.mainContainer}
     >
+      {loading && (
+        <Modal
+          transparent={true}
+          animationType='fade'
+          visible={loading}
+          onRequestClose={() => setLoading(false)}
+        >
+          <View style={styles.modalBackground}>
+            <View style={styles.loadingWrapper}>
+              <ActivityIndicator size='large' color='white'/>
+              <Text style={{color: 'white', fontWeight: '400'}}>Loading...</Text>
+            </View>
+          </View>
+        </Modal>
+      )}
+      
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.topContainer}>
           <View style={styles.header}>
@@ -109,9 +149,9 @@ const profile = () => {
           </View>
 
           <View style={[styles.verifyBox, {
-            backgroundColor: (emailConfirmed) ? 'darkcyan' : 'orange'
+            backgroundColor: (!emailConfirmed) ? 'darkcyan' : 'orange'
           }]}>
-            {emailConfirmed ? (
+            {(!emailConfirmed) ? (
               <>
                 <Octicons name="verified" size={24} color="white" />
                 <Text style={[styles.verifyText, {color: 'white'}]}>Account verified.</Text>
@@ -148,13 +188,14 @@ const profile = () => {
           ) : <Text style={[styles.warnText, {color: 'red'}]}>Incorrect format.</Text>}
           <TextInput
             style={[styles.input, {
-              borderColor: (emailConfirmed) ? 'gray' : 'darkred',
-              borderWidth: (emailConfirmed) ? 1 : 2
+              borderColor: (!emailConfirmed) ? 'gray' : 'darkred',
+              borderWidth: (!emailConfirmed) ? 1 : 2
             }]}
-            placeholder={(emailConfirmed) ? email : 'Please confirm your email.'}
+            placeholder={(!emailConfirmed) ? email : 'Email pending confirmation.'}
             value={newEmail}
             onChangeText={handleEmail}
             keyboardType='email-address'
+            editable={(emailConfirmed) ? false : true}
           />
         </View>
 
@@ -165,6 +206,7 @@ const profile = () => {
                 borderColor: (!newEmail || newEmail === email || !emailMatch) ? 'gray' : 'black'
               }
             ]}
+            onPress={handleChange}
             disabled={!newEmail || newEmail === email || !emailMatch}
           >
             <Text style={[styles.buttonText,
@@ -179,7 +221,6 @@ const profile = () => {
           >
             <Text style={[styles.buttonText, {color: 'white'}]}>Delete account</Text>
           </TouchableOpacity>
-          {loading ? <ActivityIndicator/> : null}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -192,6 +233,21 @@ const styles = StyleSheet.create({
     paddingTop: 70,
     paddingHorizontal: 20
   },
+  modalBackground: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)'
+  },
+  loadingWrapper: {
+      backgroundColor: 'black',
+      height: 100,
+      width: 100,
+      borderRadius: 10,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -200,11 +256,12 @@ const styles = StyleSheet.create({
   },
   topContainer: {
     flex: 1,
-    paddingBottom: 45
+    paddingBottom: 35
   },
   title: {
     fontSize: 30,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    paddingRight: 15
   },
   verifyBox: {
     height: 65,

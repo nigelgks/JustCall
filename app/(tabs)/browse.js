@@ -7,16 +7,21 @@ import { View,
          TouchableOpacity,
          Platform,
          PermissionsAndroid,
-         ImageBackground
+         ImageBackground,
+         Modal,
+         ActivityIndicator
         } from 'react-native';
 import Contacts from 'react-native-contacts';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import Fontisto from '@expo/vector-icons/Fontisto';
 
 const browse = () => {
   const [search, setSearch] = useState('');
   const [contacts, setContacts] = useState(null);
   const [filteredcontactLists, setFilteredcontactLists] = useState(null);
   const [disable, setDisable] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const requestPermission = async () => {
@@ -59,8 +64,53 @@ const browse = () => {
     };
   };
 
+  const handleShowModal = () => {
+    setShowModal(true);
+  };
+
+  const handleHideModal = () => {
+    setShowModal(false);
+  };
+
   return (
     <View style={styles.container}>
+      {loading && (
+        <Modal
+          transparent={true}
+          animationType='fade'
+          visible={loading}
+          onRequestClose={() => setLoading(false)}
+        >
+          <View style={styles.modalBackground}>
+            <View style={styles.loadingWrapper}>
+              <ActivityIndicator size='large' color='white'/>
+              <Text style={{color: 'white', fontWeight: '400'}}>Loading...</Text>
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {showModal && (
+        <Modal
+          transparent={true}
+          animationType='fade'
+          visible={showModal}
+          onRequestClose={() => setShowModal(false)}
+        >
+          <View style={styles.modalBackground}>
+            <View style={styles.loadingWrapper}>
+              <View style={{justifyContent: 'center'}}>
+                <Text style={styles.nameText}>Al-Sultan Abdullah Ri'ayatuddin Al-Mustafa Billah Shah ibni Almarhum Sultan Haji Ahmad Shah</Text>
+                <Text style={styles.phoneText}>+6001987817855</Text>
+              </View>
+              <TouchableOpacity style={{paddingTop: 20}} onPress={handleHideModal}>
+                <Fontisto name="close" size={30} color="black"/>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
+      
       <View style={styles.topContainer}>
         <Text style={styles.title}>Browse</Text>
 
@@ -74,7 +124,7 @@ const browse = () => {
           />
           <TouchableOpacity style={[styles.searchButton, {
               backgroundColor: (disable) ? 'gray' : 'black'
-            }]} disabled={disable}
+            }]} disabled={disable} onPress={(handleShowModal)}
           >
             <FontAwesome name="chain-broken" size={24} color="white"/>
           </TouchableOpacity>
@@ -116,6 +166,34 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 70
+  },
+  modalBackground: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)'
+  },
+  loadingWrapper: {
+      backgroundColor: 'white',
+      width: 300,
+      borderRadius: 10,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingBottom: 20,
+      paddingTop: 15,
+      paddingHorizontal: 20
+  },
+  nameText: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    paddingBottom: 20,
+    textAlign: 'center'
+  },
+  phoneText: {
+    fontSize: 25,
+    fontWeight: '400',
+    textAlign: 'center'
   },
   topContainer: {
     alignContent: 'center',
