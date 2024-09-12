@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import { View,
          Text,
          StyleSheet,
@@ -9,33 +10,47 @@ import { View,
          Modal,
          ActivityIndicator
         } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { Ionicons } from '@expo/vector-icons';
+
+//Import APIs and router
 import { useLocalSearchParams, useRouter } from 'expo-router/build';
 import { supabase } from '../../supabase/supabase';
 import '@walletconnect/react-native-compat';
 import { useWeb3ModalAccount } from '@web3modal/ethers-react-native';
 
-const verification = () => {
+//Import vector icons
+import { Ionicons } from '@expo/vector-icons';
+
+const Verification = () => {
+    //Retrieve connected wallet address
+    const { address } = useWeb3ModalAccount();
+    
+    //Expo router navigation
     const router = useRouter();
 
+    //Passed variables from previous page
     const { signIn, phoneNum, email, password } = useLocalSearchParams();
-    const { address } = useWeb3ModalAccount();
 
+    //useState hooks
     const [code, setCode] = useState('');
     const [session, setSession] = useState(null);
     const [disable, setDisable] = useState(true);
     const [loading, setLoading] = useState(false);
 
+    //Manage user session
     useEffect(() => {
+        //Check whether user session already exist
         if (session) {
+            //Check whether phone is confirmed
             if (session.user.phone_confirmed_at) {
                 const signInDate = new Date(session.user.last_sign_in_at);
                 const confirmedDate = new Date(session.user.phone_confirmed_at);
 
+                //Verify whether user confirmed before login
                 if (signInDate > confirmedDate) {
-                    console.log(session.user.phone_confirmed_at);
+                    console.log(confirmedDate);
                     console.log('Logged in succesfully.');
+
+                    //Navigate to main page
                     router.replace('keypad');
                 } else {
                     console.log("Not verified yet.");
@@ -44,11 +59,13 @@ const verification = () => {
                 console.log("Not verified yet.");
             };
         } else {
+            //Resend OTP to user if session is null
             console.log("No session.");
             sendCode();
         };
     }, [session]);
 
+    //Function to format OTP
     const handleOTP = (text) => {
         if (text.length < 7) {
             setCode(text);
@@ -60,14 +77,17 @@ const verification = () => {
         };
     };
 
+    //Function to re-format phone number for display
     const hiddenNum = (phoneNum) => {
         lastNum = phoneNum.slice(9);
         formattedNum = '+60 01*-*** ' + lastNum;
         return formattedNum;
     };
 
+    //Function to send user OTP
     const sendCode = async () => {
         if (signIn == 'true') {
+            //Sign in user with OTP
             const {error} = await supabase.auth.signInWithOtp({
                 phone: phoneNum
             });
@@ -80,6 +100,7 @@ const verification = () => {
                 console.log('Code sent successfully.');
             };
         } else {
+            //Sign up user with OTP
             const {error} = await supabase.auth.signUp({
                 phone: phoneNum,
                 password
@@ -93,6 +114,7 @@ const verification = () => {
         };
     };
 
+    //Function to verify OTP
     const checkCode = async () => {
         setLoading(true);
 
@@ -119,6 +141,7 @@ const verification = () => {
         setLoading(false);
     };
 
+    //Function to update email in database
     const addEmail = async () => {
         const {error} = await supabase.auth.updateUser({
             email
@@ -131,6 +154,7 @@ const verification = () => {
         };
     };
 
+    //Function to add user information in database
     const addAccount = async (userID, addr) => {
         const addData = {
             id: userID,
@@ -302,4 +326,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default verification;
+export default Verification;

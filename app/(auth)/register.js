@@ -8,11 +8,19 @@ import { View,
          Platform,
          ScrollView
         } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+
+//Import APIs and router
 import { useRouter } from 'expo-router';
 import { supabase } from '../../supabase/supabase';
 
+//Import vector icons
+import { Ionicons } from '@expo/vector-icons';
+
 const Register = () => {
+  //Expo router navigation
+  const router = useRouter();
+  
+  //useState hooks
   const [phoneNum, setPhoneNum] = useState('+60');
   const [email, setEmail] = useState('');
   const [emailMatch, setEmailMatch] = useState(true);
@@ -21,16 +29,17 @@ const Register = () => {
   const [passwordLength, setPasswordLength] = useState(false);
   const [passwordMatch, setPasswordMatch] = useState(false);
 
-  const router = useRouter();
-
+  //Set email format
   const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+  //Function to manage phone number format
   const handleChange = (text) => {
     if (text.startsWith('+60') && text.length <= 14) {
       setPhoneNum(text);
     };
   };
 
+  //Function to manage email format
   const handleEmail = (text) => {
     if (emailFormat.test(text)) {
       setEmailMatch(true);
@@ -44,6 +53,7 @@ const Register = () => {
     setEmail(text);
   };
 
+  //Function to manage password minimum length
   const handlePassword = (text) => {
     if (text.length > 0 && text.length < 8) {
       setPasswordLength(true);
@@ -53,6 +63,7 @@ const Register = () => {
     setPassword(text);
   };
 
+  //Function to confirm password similarity
   const handleConfirmPassword = (text) => {
     if (text.length > 0 && text == password && password.length > 0) {
       setPasswordMatch(true);
@@ -62,17 +73,21 @@ const Register = () => {
     setConfirmedPassword(text);
   };
 
+  //Function to manage next button
   const handleButtonPress = async () => {
+    //Re-format phone number
     if (phoneNum[3] == '1') {
       formattedNum = phoneNum.slice(0,3) + '0' + phoneNum.slice(3);
     } else {
       formattedNum = phoneNum;
     };
 
+    //Validate registered phone numbers
     const data = await checkPhoneNum(formattedNum);
 
     console.log(data);
 
+    //Navigate user to verification page if phone number does not exist
     if (data.length == 0) {
       const signIn = false;
       
@@ -90,6 +105,7 @@ const Register = () => {
     };
   };
 
+  //Function to validate existing phone number in database
   const checkPhoneNum = async (phone) => {
     console.log(phone);
 
@@ -102,9 +118,11 @@ const Register = () => {
       console.log("Unable to search phone number: ", error);
       return null;
     } else if (data.length === 0) {
+      //Proceed if phone number does not exist
       console.log('No phone found in database.');
       return data;
     } else {
+      //Redirect user back to login page if phone number already exist in database
       console.log('Phone number already registered.');
       alert('Phone number already registered. Please login.');
       router.navigate('login');

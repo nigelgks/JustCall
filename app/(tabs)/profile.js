@@ -9,17 +9,25 @@ import { View,
          ScrollView,
          Modal
         } from 'react-native';
-import { supabase } from '../../supabase/supabase';
+
+//Import APIs and router
 import { useRouter } from 'expo-router';
+import { supabase } from '../../supabase/supabase';
 import '@walletconnect/react-native-compat';
 import { useWeb3ModalAccount } from '@web3modal/ethers-react-native';
+
+//Import vector icons
 import { AntDesign } from '@expo/vector-icons';
 import Octicons from '@expo/vector-icons/Octicons';
 
-const profile = () => {
+const Profile = () => {
+  //Retrieve connected wallet address
   const { address } = useWeb3ModalAccount();
+
+  //Expo router navigation
   const router = useRouter();
 
+  //useState hooks
   const [email, setEmail] = useState('');
   const [emailConfirmed, setEmailConfirmed] = useState('');
   const [newEmail, setNewEmail] = useState('');
@@ -29,9 +37,12 @@ const profile = () => {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  //Set email format
   const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+  //Retrieve user's profile at first render
   useEffect(() => {
+    //Function to retrieve user's profile from session
     const fetchSessionData = async () => {
       const {data} = await supabase.auth.getSession();
       if (!session) {
@@ -39,6 +50,7 @@ const profile = () => {
       };
     };
 
+    //Assign email and phone number to useState hooks
     if (session) {
       if (!session.user.email) {
         alert('Please confirm your email. Check your inbox.');
@@ -51,11 +63,14 @@ const profile = () => {
         setEmailConfirmed(session.user.new_email);
       };
     } else {
+      //Retrieve again if session is null
       fetchSessionData();
     };
   }, [session]);
 
+  //Retrieve name from database at first render
   useEffect(() => {
+    //Function to retrieve name based on wallet address from database
     const getName = async () => {
       const { data, error } = await supabase
           .from('accounts')
@@ -72,6 +87,7 @@ const profile = () => {
     getName();
   }, [address]);
 
+  //Function to prevent similar new and present email
   const handleEmail = (text) => {
     if (emailFormat.test(text)) {
       setEmailMatch(true);
@@ -85,6 +101,7 @@ const profile = () => {
     setNewEmail(text);
   };
 
+  //Function to update email change in Supabase
   const handleChange = async () => {
     setLoading(true);
     console.log(`Changing to ${newEmail}.`);
@@ -104,6 +121,7 @@ const profile = () => {
     setLoading(false);
   };
 
+  //Function to handle logout activity
   const handleLogout = async () => {
     try {
       setLoading(true);
@@ -324,4 +342,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default profile;
+export default Profile;

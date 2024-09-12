@@ -11,11 +11,16 @@ import { View,
          Modal,
          ActivityIndicator
         } from 'react-native';
+
+//Import contact list manager package
 import Contacts from 'react-native-contacts';
+
+//Import vector icons
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Fontisto from '@expo/vector-icons/Fontisto';
 
-const browse = () => {
+const Browse = () => {
+  //useState hooks
   const [search, setSearch] = useState('');
   const [contacts, setContacts] = useState(null);
   const [filteredcontactLists, setFilteredcontactLists] = useState(null);
@@ -23,7 +28,9 @@ const browse = () => {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
+  //Fetch contact list at first render
   useEffect(() => {
+    //Function to manage access permission to contacts
     const requestPermission = async () => {
       if (Platform.OS === 'android') {
         const value = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS, {
@@ -33,7 +40,8 @@ const browse = () => {
         });
         
         if (value === 'granted') {
-            Contacts.getAll().then(setContacts);
+          //Fetch contacts from device
+          Contacts.getAll().then(setContacts);
         };
       } else {
         Contacts.getAll().then(setContacts);
@@ -42,18 +50,22 @@ const browse = () => {
     requestPermission();
   }, []);
 
+  //Function to handle search bar
   const handleSearch = (text) => {
+    //Limit search result maximum length
     if (text.length < 15) {
       setSearch(text);
     };
     
     if (text) {
+      //Manage search button
       if (text.length > 9) {
         setDisable(false);
       } else {
         setDisable(true);
       };
 
+      //Filter contact list based on search result
       const filteredData = contacts.filter(contacts =>
         contacts.phoneNumbers.length > 0 && contacts.phoneNumbers[0].number.includes(text)
       );
@@ -64,10 +76,12 @@ const browse = () => {
     };
   };
 
+  //Activate search modal
   const handleShowModal = () => {
     setShowModal(true);
   };
 
+  //Hide search modal
   const handleHideModal = () => {
     setShowModal(false);
   };
@@ -257,4 +271,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default browse;
+export default Browse;

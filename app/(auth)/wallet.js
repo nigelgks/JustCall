@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
+//Import APIs and router
+import { useRouter } from 'expo-router';
 import '@walletconnect/react-native-compat';
 import { createWeb3Modal,
          defaultConfig,
@@ -8,9 +10,11 @@ import { createWeb3Modal,
          Web3Modal
         } from '@web3modal/ethers-react-native';
 import { W3mButton } from '@web3modal/ethers-react-native';
-import { useRouter } from 'expo-router';
 
+//Assign WalletConnect project ID from .env
 const projectId = process.env.EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID;
+
+//WalletConnect metadata
 const metadata = {
     name: 'JustCall',
     description: 'JustCall Dapp',
@@ -20,8 +24,11 @@ const metadata = {
       native: 'YOUR_APP_SCHEME://'
     }
 };
+
+//Assign metadata to WalletConnect config
 const config = defaultConfig({metadata});
 
+//Ethereum currency
 const mainnet = {
     chainId: 1,
     name: 'Ethereum Mainnet',
@@ -30,6 +37,7 @@ const mainnet = {
     rpcUrl: 'https://mainnet.infura.io/v3/6ec31da19e8b4d44a456b8ed4b8a6846'
 };
 
+//Sepolia currency
 const sepolia = {
   chainId: 11155111,
   name: 'Sepolia Testnet',
@@ -37,9 +45,11 @@ const sepolia = {
   explorerUrl: 'https://sepolia.etherscan.io',
   rpcUrl: 'https://sepolia.infura.io/v3/6ec31da19e8b4d44a456b8ed4b8a6846'
 };
-  
+
+//All chains or currencies
 const chains = [mainnet, sepolia];
 
+//Establish WalletConnect modal
 createWeb3Modal({
     projectId,
     chains,
@@ -47,13 +57,16 @@ createWeb3Modal({
 });
 
 const wallet = () => {
+  //Check whether a wallet is connected
+  const { isConnected } = useWeb3ModalAccount();
+
+  //Expo router navigation
   const router = useRouter();
 
+  //Function to proceed with login if wallet connected
   const handleContinue = () => {
     router.navigate('login');
   };
-
-  const { isConnected } = useWeb3ModalAccount();
   
   return (
     <View style={styles.container}>

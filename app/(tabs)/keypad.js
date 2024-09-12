@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+
+//Import vector icons
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 const keypad = () => {
+  //useState hooks
   const [input, setInput] = useState('');
 
+  //Function to add number pressed into the input box
   const handlePress = (value) => {
     setInput((prevInput) => prevInput + value);
   };
 
+  //Function to backspace input
   const handleDelete = () => {
     setInput((prevInput) => prevInput.slice(0, -1));
   };
 
+  //Function to clear all input
   const handleClear = () => {
     setInput('');
   };

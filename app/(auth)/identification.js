@@ -1,12 +1,18 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Feather from '@expo/vector-icons/Feather';
-import { Ionicons } from '@expo/vector-icons';
+
+//Import Expo router
 import { useRouter } from 'expo-router';
 
+//Import vector icons
+import Feather from '@expo/vector-icons/Feather';
+import { Ionicons } from '@expo/vector-icons';
+
 const identification = () => {
+  //Expo router navigation
   const router = useRouter();
 
+  //Function to handle next button
   const handleValidation = () => {
     router.navigate('register');
   };
@@ -40,7 +46,7 @@ const identification = () => {
           onPress={handleValidation}
         >
           <Text style={styles.buttonText}>
-            SUBMIT
+            Next
           </Text>
         </TouchableOpacity>
       </View>

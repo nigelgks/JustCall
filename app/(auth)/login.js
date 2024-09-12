@@ -1,20 +1,33 @@
-import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, ActivityIndicator } from 'react-native';
+import { View,
+         Text,
+         TextInput,
+         TouchableOpacity,
+         StyleSheet,
+         Modal,
+         ActivityIndicator
+        } from 'react-native';
+
+//Import APIs and router
+import { useRouter } from 'expo-router';
 import { supabase } from '../../supabase/supabase';
 import '@walletconnect/react-native-compat';
 import { useWeb3ModalAccount } from '@web3modal/ethers-react-native';
 
 const Login = () => {
+  //Retrieve connected wallet address
   const { address } = useWeb3ModalAccount();
 
+  //Expo router navigation
+  const router = useRouter();
+
+  //useState hooks
   const [phoneNum, setPhoneNum] = useState('+60');
   const [password, setPassword] = useState('');
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const router = useRouter();
-
+  //Redirect user to main page if session exist
   useEffect(() => {
     if (session) {
       console.log('Login successful. Redirecting to main page.');
@@ -22,12 +35,14 @@ const Login = () => {
     };
   }, [session]);
 
+  //Function to manage phone number format
   const handleChange = (text) => {
     if (text.startsWith('+60') && text.length <= 14) {
       setPhoneNum(text);
     };
   };
 
+  //Function to re-format phone number
   const formatNum = (num) => {
     if (num[3] == '1') {
       return (num.slice(0,3) + '0' + num.slice(3));
@@ -36,10 +51,13 @@ const Login = () => {
     return num;
   };
 
+  //Function to handle login operation
   const handleLogin = async () => {
     setLoading(true);
+
     const data = await checkAddress(address, false);
 
+    //Proceed login with password if wallet address already registered
     if (data != null && data.length > 0) {
       const formattedNum = formatNum(phoneNum);
 
@@ -56,6 +74,7 @@ const Login = () => {
         };
       };
 
+      //Update session after login
       const {data} = await supabase.auth.getSession();
       setSession(data.session);
       setPhoneNum('+60');
@@ -64,19 +83,24 @@ const Login = () => {
     setLoading(false);
   };
 
+  //Function to handle registration operation
   const handleRegister = async () => {
     const data = await checkAddress(address, true);
 
     if (data.length === 0) {
+      //Proceed registration if wallet address is not registered
       router.navigate('identification');
     } else if (data.length > 0) {
+      //Show alert if wallet address is already registered
       alert(`User wallet [${address}] is already registered. Please log in.`);
     };
   };
 
+  //Function to navigate to OTP verification page
   const handleOTP = async () => {
     const data = await checkAddress(address, false);
 
+    //Proceed login with OTP if wallet address already registered
     if (data != null && data.length > 0) {
       const formattedNum = formatNum(phoneNum);
 
@@ -97,6 +121,7 @@ const Login = () => {
     };
   };
 
+  //Check whether wallet address already exist in database
   const checkAddress = async (addr, register) => {
     const { data, error } = await supabase
       .from('accounts')
@@ -107,13 +132,16 @@ const Login = () => {
       console.log("Unable to search address: ", error);
       return null;
     } else if (data.length === 0) {
+      //Address does not exist in database
       console.log('No address found in database.');
       if (register == false) {
+        //Navigate user back to wallet page if address is not registered
         alert('Address does not exist in database. Please select another wallet.');
         router.back();
       };
       return data;
     } else {
+      //Address already exist in database
       console.log('Address found in database:', data);
       return data;
     };
