@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View,
+         Text,
+         StyleSheet,
+         TouchableOpacity,
+         PermissionsAndroid,
+         Platform,
+         Linking
+        } from 'react-native';
 
 //Import vector icons
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -7,6 +14,36 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 const keypad = () => {
   //useState hooks
   const [input, setInput] = useState('');
+
+  //Request call permission at first render
+  useEffect(() => {
+    //Function to manage access permission to call
+    const requestPermission = async () => {
+      if (Platform.OS === 'android') {
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.CALL_PHONE,
+            {
+              title: 'Phone Call Permission',
+              message: 'JustCall needs access to make phone calls.',
+              buttonNeutral: 'Ask Me Later',
+              buttonNegative: 'Cancel',
+              buttonPositive: 'Allow',
+            },
+          );
+
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            console.log('Phone call permission allowed.');
+          } else {
+            console.log('Phone call permission denied.');
+          };
+        } catch (error) {
+          console.log(error);
+        };
+      };
+    };
+    requestPermission();
+  }, []);
 
   //Function to add number pressed into the input box
   const handlePress = (value) => {
@@ -21,6 +58,13 @@ const keypad = () => {
   //Function to clear all input
   const handleClear = () => {
     setInput('');
+  };
+
+  const handleCall = () => {
+    if (Platform.OS === 'android') {
+      Linking.openURL(`tel:${input}`);
+    };
+    handleClear();
   };
 
   return (
@@ -45,19 +89,24 @@ const keypad = () => {
           onPress={handleClear}
           disabled={input == ''}
         >
-          {input == '' ? null : <Ionicons name="trash-outline" size={30} color="black" />}
+          {input == '' ? null : <Ionicons name="trash-outline" size={30} color="black"/>}
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.callButton}
+          style={[styles.callButton, {borderColor: (input == '') ? 'gray' : 'black'}]}
+          onPress={handleCall}
+          disabled={input == ''}
         >
-          <Ionicons name="call-outline" size={30} color="black" />
+          {input == '' ? 
+            <Ionicons name="call-outline" size={30} color="gray"/> : 
+            <Ionicons name="call-outline" size={30} color="black"/>
+          }
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.controlButton}
           onPress={handleDelete}
           disabled={input == ''}
         >
-          {input == '' ? null : <Ionicons name="backspace-outline" size={30} color="black" />}
+          {input == '' ? null : <Ionicons name="backspace-outline" size={30} color="black"/>}
         </TouchableOpacity>
       </View>
     </View>

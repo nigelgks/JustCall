@@ -36,6 +36,7 @@ const Profile = () => {
   const [name, setName] = useState('');
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   //Set email format
   const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -121,6 +122,16 @@ const Profile = () => {
     setLoading(false);
   };
 
+  //Function to show modal to delete account
+  const handleModal = () => {
+    setShowModal(true);
+  };
+
+  //Function to hide modal to delete account
+  const hideModal = () => {
+    setShowModal(false);
+  };
+
   //Function to handle logout activity
   const handleLogout = async () => {
     try {
@@ -149,9 +160,63 @@ const Profile = () => {
           onRequestClose={() => setLoading(false)}
         >
           <View style={styles.modalBackground}>
-            <View style={styles.loadingWrapper}>
+            <View style={[styles.loadingWrapper, {backgroundColor: 'black'}]}>
               <ActivityIndicator size='large' color='white'/>
               <Text style={{color: 'white', fontWeight: '400'}}>Loading...</Text>
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {showModal && (
+        <Modal
+          transparent={true}
+          animationType='fade'
+          visible={showModal}
+          onRequestClose={() => setShowModal(false)}
+        >
+          <View style={styles.modalBackground}>
+            <View style={[styles.modalWrapper, {backgroundColor: 'white'}]}>
+              <Text style={[styles.modalText, {
+                padding: 10,
+                marginBottom: 12,
+                borderRadius: 10,
+                fontWeight: 'bold',
+                fontSize: 16,
+                backgroundColor: 'black',
+                color: 'white'
+              }]}>
+                Deleted account will not be recoverable.
+              </Text>
+              <Text style={[styles.modalText, {fontWeight: '400', fontSize: 16}]}>
+                Once confirmed, deletion will be done within 24 hours.
+              </Text>
+
+              <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                paddingTop: 20
+              }}>
+                <TouchableOpacity
+                  style={[styles.modalButton, {borderWidth: 2}]}
+                  onPress={hideModal}
+                >
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalButton, {backgroundColor: 'darkred'}]}
+                >
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <AntDesign name="warning" size={19} color="white"/>
+                    <Text 
+                      style={[styles.buttonText, {color: 'white', paddingLeft: 5}]}
+                      onPress={handleLogout}
+                    >
+                      Proceed
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </Modal>
@@ -236,6 +301,7 @@ const Profile = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.deleteButton}
+            onPress={handleModal}
           >
             <Text style={[styles.buttonText, {color: 'white'}]}>Delete account</Text>
           </TouchableOpacity>
@@ -258,13 +324,26 @@ const styles = StyleSheet.create({
       backgroundColor: 'rgba(0, 0, 0, 0.5)'
   },
   loadingWrapper: {
-      backgroundColor: 'black',
       height: 100,
       width: 100,
       borderRadius: 10,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+  },
+  modalWrapper: {
+    padding: 20,
+    borderRadius: 10,
+    width: 300
+  },
+  modalText: {
+    textAlign:'center'
+  },
+  modalButton: {
+    padding: 8,
+    borderRadius: 10,
+    width: '45%',
+    alignItems: 'center'
   },
   header: {
     flexDirection: 'row',
@@ -274,7 +353,7 @@ const styles = StyleSheet.create({
   },
   topContainer: {
     flex: 1,
-    paddingBottom: 35
+    paddingBottom: 25
   },
   title: {
     fontSize: 30,

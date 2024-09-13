@@ -34,7 +34,7 @@ const Browse = () => {
     const requestPermission = async () => {
       if (Platform.OS === 'android') {
         const value = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS, {
-          title: 'Contacts',
+          title: 'Contacts Permission',
           message: 'JustCall would like to access your contacts.',
           buttonPositive: 'Allow',
         });
@@ -118,7 +118,7 @@ const Browse = () => {
                 <Text style={styles.phoneText}>+6001987817855</Text>
               </View>
               <TouchableOpacity style={{paddingTop: 20}} onPress={handleHideModal}>
-                <Fontisto name="close" size={30} color="black"/>
+                <Fontisto name="close" size={25} color="black"/>
               </TouchableOpacity>
             </View>
           </View>
@@ -199,13 +199,13 @@ const styles = StyleSheet.create({
       paddingHorizontal: 20
   },
   nameText: {
-    fontSize: 25,
+    fontSize: 20,
     fontWeight: 'bold',
     paddingBottom: 20,
     textAlign: 'center'
   },
   phoneText: {
-    fontSize: 25,
+    fontSize: 20,
     fontWeight: '400',
     textAlign: 'center'
   },
