@@ -42,6 +42,7 @@ const Browse = () => {
         if (value === 'granted') {
           //Fetch contacts from device
           Contacts.getAll().then(setContacts);
+          console.log('Contact list permission allowed.')
         };
       } else {
         Contacts.getAll().then(setContacts);

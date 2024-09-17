@@ -1,36 +1,99 @@
 //const {ethers} = require('ethers');
-const {ethers} = require('hardhat');
 //const contract = require("../artifacts/contracts/JustCall.sol/JustCall.json");
-//const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545")
+//const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
 
+const {ethers} = require('hardhat');
 const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-//const abi = contract.abi;
 
+//const abi = contract.abi;
 //const JustCall = new ethers.Contract(contractAddress, abi, provider);
 
 async function main() {
-    //const justCall = await JustCall.deploy();
-
+    //Establish contract
     const JustCall = await ethers.getContractFactory("JustCall");
-    const justCall = JustCall.attach(contractAddress);
 
-    //const signer = provider.getSigner('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
+    //Fetch signers and assign
+    const [owner, addr1, addr2] = await ethers.getSigners();
+    const user = owner;
 
-    //const justCall = JustCall.connect(signer);
+    //Attach user to contract
+    const justCall = JustCall.attach(contractAddress).connect(user);
 
-    console.log(await justCall.owner());
+    //Fetch wallet balance before any transation or function call
+    const oldBalance = await ethers.provider.getBalance(user);
 
-    //await justCall.register("John Doe", "1234567890");
 
-    await justCall.removeUser(await justCall.owner());
 
-    const user = await justCall.getUserByPhoneNumber("1234567890");
-    console.log("user: ", user);
+    //Call owner address
+    //console.log(await justCall.owner());
 
-    // const profile = await justCall.getUserByAddress();
-    // console.log("profile: ", profile);
 
-    // await justCall.removeUser(justCall.owner());
+    //Register new user
+    try {
+        await justCall.register("John Doe", "1234567890");
+    } catch(error) {
+        //Throw revereted error if user already exist
+        if (error.message.includes('User already registered.')) {
+            console.log("User already registered.");
+        } else if (error.message.includes('Phone number already registered')) {
+            console.log("Phone number already registered.");
+        } else if (error.message.includes('Invalid phone number length.')) {
+            console.log("Invalid phone number length.");
+        } else {
+            console.log('Error:', error);
+        };
+    };
+
+
+    //Remove user (owner only)
+    // try {
+    //     await justCall.removeUser(addr1.address);
+    // } catch(error) {
+    //     if (error.message.includes('Only the contract administrator can call this function.')) {
+    //         console.log("Only the contract administrator can call this function.");
+    //     } else if (error.message.includes('User does not exist.')) {
+    //         console.log("User does not exist.");
+    //     } else {
+    //         console.log('Error:', error);
+    //     };
+    // };
+
+
+    //Get user's name given phone number
+    // try {
+    //     const profilePhone = await justCall.getUserByPhoneNumber("1234567890");
+    //     console.log("user: ", profilePhone);
+    // } catch (error) {
+    //     if (error.message.includes('Invalid phone number length.')) {
+    //         console.log("Invalid phone number length.");
+    //     } else if (error.message.includes('Phone number is not registered')) {
+    //         console.log("Phone number is not registered.");
+    //     } else {
+    //         console.log('Error:', error);
+    //     };
+    // };
+
+
+    //Get user's profile given address
+    // try {
+    //     const profileAddr = await justCall.getUserByAddress();
+    //     console.log("profile: ", profileAddr);
+    // } catch (error) {
+    //     if (error.message.includes('User does not exist.')) {
+    //         console.log("User does not exist.");
+    //     } else {
+    //         console.log('Error:', error);
+    //     };
+    // };
+
+
+
+    //Fetch wallet balance after any transaction or function call
+    const newBalance = await ethers.provider.getBalance(user);
+
+    //Display wallet balance and transaction cost (ETH)
+    console.log("Balance:", ethers.formatEther(newBalance), "ETH");
+    console.log("Cost:", (ethers.formatEther(oldBalance)) - (ethers.formatEther(newBalance)), "ETH");
 };
 
 main();
