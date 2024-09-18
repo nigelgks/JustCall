@@ -34,7 +34,7 @@ const mainnet = {
     name: 'Ethereum Mainnet',
     currency: 'ETH',
     explorerUrl: 'https://etherscan.io',
-    rpcUrl: 'https://mainnet.infura.io/v3/6ec31da19e8b4d44a456b8ed4b8a6846'
+    rpcUrl: `https://mainnet.infura.io/v3/${process.env.EXPO_PUBLIC_INFURA_PROJECT_ID}`
 };
 
 //Sepolia currency
@@ -43,7 +43,7 @@ const sepolia = {
   name: 'Sepolia Testnet',
   currency: 'ETH',
   explorerUrl: 'https://sepolia.etherscan.io',
-  rpcUrl: 'https://sepolia.infura.io/v3/6ec31da19e8b4d44a456b8ed4b8a6846'
+  rpcUrl: `https://sepolia.infura.io/v3/${process.env.EXPO_PUBLIC_INFURA_PROJECT_ID}`
 };
 
 //All chains or currencies

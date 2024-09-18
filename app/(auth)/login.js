@@ -22,7 +22,9 @@ const Login = () => {
   const router = useRouter();
 
   //useState hooks
-  const [phoneNum, setPhoneNum] = useState('+60');
+  const [phoneNum, setPhoneNum] = useState('+60 ');
+  const [phoneFormat, setPhoneFormat] = useState(false);
+  const [phoneLength, setPhoneLength] = useState(false);
   const [password, setPassword] = useState('');
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -37,18 +39,37 @@ const Login = () => {
 
   //Function to manage phone number format
   const handleChange = (text) => {
-    if (text.startsWith('+60') && text.length <= 14) {
+    //Detect non-numerical characters
+    str = text.slice(4).match(/\D/g);
+
+    if (str) {
+      setPhoneFormat(true);
+    } else {
+      setPhoneFormat(false);
+    };
+
+    //Manage phone number format
+    if (text.startsWith('+60 ') && text.length <= 14) {
       setPhoneNum(text);
+    };
+
+    //Manage phone number length
+    if (text.length < 13) {
+      setPhoneLength(true);
+    } else {
+      setPhoneLength(false);
     };
   };
 
   //Function to re-format phone number
   const formatNum = (num) => {
-    if (num[3] == '1') {
-      return (num.slice(0,3) + '0' + num.slice(3));
+    newNum = num.replace(/\s+/g, "");
+
+    if (newNum[3] == '0') {
+      return (newNum.slice(0,3) + newNum.slice(4));
     };
     
-    return num;
+    return newNum;
   };
 
   //Function to handle login operation
@@ -77,7 +98,7 @@ const Login = () => {
       //Update session after login
       const {data} = await supabase.auth.getSession();
       setSession(data.session);
-      setPhoneNum('+60');
+      setPhoneNum('+60 ');
       setPassword('');
     };
     setLoading(false);
@@ -116,7 +137,7 @@ const Login = () => {
         params: profile
       });
 
-      setPhoneNum('+60');
+      setPhoneNum('+60 ');
       setPassword('');
     };
   };
@@ -169,12 +190,17 @@ const Login = () => {
       <Text style={styles.desc}>Sign in to continue.</Text>
 
       <Text style={styles.inputTitle}>PHONE NUMBER</Text>
+      { !phoneFormat ? (
+        null
+      ) : <Text style={[styles.warnText, {color: 'red'}]}>Numerical characters only</Text>}
+      { !phoneLength ? (
+        null
+      ) : <Text style={[styles.warnText, {color: 'darkred'}]}>Minimum 13 characters</Text>}
       <TextInput
         style={styles.input}
-        placeholder='Phone number'
         value={phoneNum}
         onChangeText={handleChange}
-        keyboardType='phone-pad'
+        keyboardType='number-pad'
       />
       <Text style={styles.inputTitle}>PASSWORD</Text>
       <TextInput
@@ -186,9 +212,12 @@ const Login = () => {
         onChangeText={(text) => setPassword(text)}
       />
       <TouchableOpacity
-        style={styles.loginButton}
+        style={[styles.loginButton, {
+          backgroundColor: (!phoneNum || !password || phoneFormat || phoneLength) ?
+                 'darkgray' : 'black'
+        }]}
         onPress={handleLogin}
-        disabled={!phoneNum || !password}
+        disabled={!phoneNum || !password || phoneFormat || phoneLength}
       >
         <Text style={styles.loginText}>
           Login with password
@@ -205,9 +234,12 @@ const Login = () => {
       <TouchableOpacity
         style={styles.otpButton}
         onPress={handleOTP}
-        disabled={!phoneNum || !password}
+        disabled={!phoneNum || phoneNum == '+60 ' || phoneFormat || phoneLength}
       >
-        <Text style={styles.otpText}>
+        <Text style={[styles.otpText, {
+          color: (!phoneNum || phoneNum == '+60 ' || phoneFormat || phoneLength) ?
+                 'lightsteelblue' : 'royalblue'
+        }]}>
           Login with OTP instead
         </Text>
       </TouchableOpacity>
@@ -258,6 +290,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: 'left'
   },
+  warnText: {
+    fontSize: 9,
+    paddingBottom: 5
+  },
   input: {
     width: '100%',
     height: 50,
@@ -270,7 +306,6 @@ const styles = StyleSheet.create({
   loginButton: {
     width: '100%',
     height: 50,
-    backgroundColor: 'black',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
@@ -305,8 +340,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
   otpText: {
-    textAlign: 'center', 
-    color: 'royalblue', 
+    textAlign: 'center',
     fontWeight: '500', 
     fontSize: 15
   }

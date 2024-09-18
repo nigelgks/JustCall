@@ -1,12 +1,11 @@
 //const {ethers} = require('ethers');
 //const contract = require("../artifacts/contracts/JustCall.sol/JustCall.json");
 //const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
+//const abi = contract.abi;
+//const JustCall = new ethers.Contract(contractAddress, abi, provider);
 
 const {ethers} = require('hardhat');
 const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-
-//const abi = contract.abi;
-//const JustCall = new ethers.Contract(contractAddress, abi, provider);
 
 async function main() {
     //Establish contract

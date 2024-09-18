@@ -7,6 +7,9 @@ module.exports = {
   networks: {
     hardhat: {
       chainId: 31337
+    },
+    sepolia: {
+      url: `https://sepolia.infura.io/v3/${process.env.EXPO_PUBLIC_INFURA_PROJECT_ID}`
     }
   }
 };

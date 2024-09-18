@@ -21,7 +21,9 @@ const Register = () => {
   const router = useRouter();
   
   //useState hooks
-  const [phoneNum, setPhoneNum] = useState('+60');
+  const [phoneNum, setPhoneNum] = useState('+60 ');
+  const [phoneFormat, setPhoneFormat] = useState(false);
+  const [phoneLength, setPhoneLength] = useState(false);
   const [email, setEmail] = useState('');
   const [emailMatch, setEmailMatch] = useState(true);
   const [password, setPassword] = useState('');
@@ -30,12 +32,29 @@ const Register = () => {
   const [passwordMatch, setPasswordMatch] = useState(false);
 
   //Set email format
-  const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailFormat = /^[^\s@]+@[^\s@]+\.com$/;
 
   //Function to manage phone number format
   const handleChange = (text) => {
-    if (text.startsWith('+60') && text.length <= 14) {
+    //Detect non-numerical characters
+    str = text.slice(4).match(/\D/g);
+
+    if (str) {
+      setPhoneFormat(true);
+    } else {
+      setPhoneFormat(false);
+    };
+
+    //Manage phone number format
+    if (text.startsWith('+60 ') && text.length <= 14) {
       setPhoneNum(text);
+    };
+
+    //Manage phone number length
+    if (text.length < 13) {
+      setPhoneLength(true);
+    } else {
+      setPhoneLength(false);
     };
   };
 
@@ -76,10 +95,12 @@ const Register = () => {
   //Function to manage next button
   const handleButtonPress = async () => {
     //Re-format phone number
-    if (phoneNum[3] == '1') {
-      formattedNum = phoneNum.slice(0,3) + '0' + phoneNum.slice(3);
+    newNum = phoneNum.replace(/\s+/g, "");
+
+    if (newNum[3] == '0') {
+      formattedNum = newNum.slice(0,3) + newNum.slice(4);
     } else {
-      formattedNum = phoneNum;
+      formattedNum = newNum;
     };
 
     //Validate registered phone numbers
@@ -145,6 +166,12 @@ const Register = () => {
           <Text style={styles.title}>Registration</Text> 
 
           <Text style={styles.inputTitle}>PHONE NUMBER</Text>
+          { !phoneFormat ? (
+            null
+          ) : <Text style={[styles.warnText, {color: 'red'}]}>Numerical characters only</Text>}
+          { !phoneLength ? (
+            null
+          ) : <Text style={[styles.warnText, {color: 'red'}]}>Minimum 13 characters</Text>}
           <TextInput
             style={styles.input}
             value={phoneNum}

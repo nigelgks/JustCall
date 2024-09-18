@@ -79,8 +79,13 @@ const Verification = () => {
 
     //Function to re-format phone number for display
     const hiddenNum = (phoneNum) => {
-        lastNum = phoneNum.slice(9);
-        formattedNum = '+60 01*-*** ' + lastNum;
+        if (phoneNum.length == 12) {
+            lastNum = phoneNum.slice(8);
+            formattedNum = '+60 1*-*** ' + lastNum;
+        } else {
+            lastNum = phoneNum.slice(9);
+            formattedNum = '+60 1*-**** ' + lastNum;
+        }
         return formattedNum;
     };
 
