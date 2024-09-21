@@ -82,22 +82,28 @@ const Login = () => {
     if (data != null && data.length > 0) {
       const formattedNum = formatNum(phoneNum);
 
-      const {error} = await supabase.auth.signInWithPassword({
-          phone: formattedNum,
-          password
-      });
+      if (data[0].phone == formattedNum) {
+        const {error} = await supabase.auth.signInWithPassword({
+            phone: formattedNum,
+            password
+        });
 
-      if (error) {
-        console.log("Unable to login: ", error);
-        
-        if (error.message.includes('Invalid login credentials')) {
-          alert('Invalid login credentials.');
+        if (error) {
+          console.log("Unable to login: ", error);
+          
+          if (error.message.includes('Invalid login credentials')) {
+            alert('Invalid login credentials.');
+          };
         };
+
+        //Update session after login
+        const {data} = await supabase.auth.getSession();
+        setSession(data.session);
+      } else {
+        console.log('Mismatched phone number:', data[0].phone, '!=', formattedNum);
+        alert('Mismatched phone number linked to connected wallet address.');
       };
 
-      //Update session after login
-      const {data} = await supabase.auth.getSession();
-      setSession(data.session);
       setPhoneNum('+60 ');
       setPassword('');
     };
@@ -125,17 +131,22 @@ const Login = () => {
     if (data != null && data.length > 0) {
       const formattedNum = formatNum(phoneNum);
 
-      const signIn = true;
-      
-      const profile = {
-        signIn,
-        phoneNum: formattedNum
+      if (data[0].phone == formattedNum) {
+        const signIn = true;
+        
+        const profile = {
+          signIn,
+          phoneNum: formattedNum
+        };
+        
+        router.navigate({
+          pathname: 'verification',
+          params: profile
+        });
+      } else {
+        console.log('Mismatched phone number:', data[0].phone, '!=', formattedNum);
+        alert('Mismatched phone number linked to connected wallet address.');
       };
-      
-      router.navigate({
-        pathname: 'verification',
-        params: profile
-      });
 
       setPhoneNum('+60 ');
       setPassword('');

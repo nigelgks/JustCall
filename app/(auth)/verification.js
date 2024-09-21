@@ -163,7 +163,7 @@ const Verification = () => {
     const addAccount = async (userID, addr) => {
         const addData = {
             id: userID,
-            name: 'JOHN DOE',
+            name: 'JANE DOE',
             address: addr,
             phone: phoneNum
         };
