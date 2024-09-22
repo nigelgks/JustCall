@@ -10,7 +10,7 @@ contract JustCall {
         string phoneNumber;
     }
 
-    mapping(string => string fullName) private users;
+    mapping(string => string) private users;
     mapping(address => Profile) private profile;
 
     //Initialize contract owner
@@ -44,8 +44,8 @@ contract JustCall {
     }
 
     //Validate address exist
-    modifier validateAddressLookup {
-        require(profile[msg.sender].addr != address(0), "User does not exist.");
+    modifier validateAddressLookup(address _addr) {
+        require(profile[_addr].addr != address(0), "User does not exist.");
         _;
     }
 
@@ -75,7 +75,7 @@ contract JustCall {
     }
 
     //Get profile details from user address
-    function getUserByAddress() external validateAddressLookup view returns(
+    function getUserByAddress() external validateAddressLookup(msg.sender) view returns(
         string memory fullName,
         string memory phoneNumber,
         address addr
@@ -85,7 +85,7 @@ contract JustCall {
     }
 
     //Remove profile when requested (owner only)
-    function removeUser(address _addr) external onlyOwner {
+    function removeUser(address _addr) external onlyOwner validateAddressLookup(_addr) {
         Profile storage user = profile[_addr];
         delete users[user.phoneNumber];
         delete profile[_addr];

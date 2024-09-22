@@ -1,23 +1,78 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View,
+         Text,
+         TouchableOpacity,
+         StyleSheet,
+         TextInput,
+         KeyboardAvoidingView,
+         Platform,
+         ScrollView
+        } from 'react-native';
+
+//Import APIs and router
 import { useRouter } from 'expo-router';
+import { supabase } from '../../supabase/supabase';
+
+//Import vector icons
+import { Ionicons } from '@expo/vector-icons';
 
 const Register = () => {
-  const [phoneNum, setPhoneNum] = useState('+60');
+  //Expo router navigation
+  const router = useRouter();
+  
+  //useState hooks
+  const [phoneNum, setPhoneNum] = useState('+60 ');
+  const [phoneFormat, setPhoneFormat] = useState(false);
+  const [phoneLength, setPhoneLength] = useState(false);
+  const [email, setEmail] = useState('');
+  const [emailMatch, setEmailMatch] = useState(true);
   const [password, setPassword] = useState('');
   const [confirmedPassword, setConfirmedPassword] = useState('');
   const [passwordLength, setPasswordLength] = useState(false);
   const [passwordMatch, setPasswordMatch] = useState(false);
 
-  const router = useRouter();
+  //Set email format
+  const emailFormat = /^[^\s@]+@[^\s@]+\.com$/;
 
+  //Function to manage phone number format
   const handleChange = (text) => {
-    if (text.startsWith('+60') && text.length <= 14) {
+    //Detect non-numerical characters
+    str = text.slice(4).match(/\D/g);
+
+    if (str) {
+      setPhoneFormat(true);
+    } else {
+      setPhoneFormat(false);
+    };
+
+    //Manage phone number format
+    if (text.startsWith('+60 ') && text.length <= 14) {
       setPhoneNum(text);
+    };
+
+    //Manage phone number length
+    if (text.length < 13) {
+      setPhoneLength(true);
+    } else {
+      setPhoneLength(false);
     };
   };
 
+  //Function to manage email format
+  const handleEmail = (text) => {
+    if (emailFormat.test(text)) {
+      setEmailMatch(true);
+    } else {
+      if (text.length > 0) {
+        setEmailMatch(false);
+      } else {
+        setEmailMatch(true);
+      };
+    };
+    setEmail(text);
+  };
+
+  //Function to manage password minimum length
   const handlePassword = (text) => {
     if (text.length > 0 && text.length < 8) {
       setPasswordLength(true);
@@ -27,6 +82,7 @@ const Register = () => {
     setPassword(text);
   };
 
+  //Function to confirm password similarity
   const handleConfirmPassword = (text) => {
     if (text.length > 0 && text == password && password.length > 0) {
       setPasswordMatch(true);
@@ -36,32 +92,73 @@ const Register = () => {
     setConfirmedPassword(text);
   };
 
-  const handleButtonPress = () => {
-    if (phoneNum[3] == '1') {
-      formattedNum = phoneNum.slice(0,3) + '0' + phoneNum.slice(3);
+  //Function to manage next button
+  const handleButtonPress = async () => {
+    //Re-format phone number
+    newNum = phoneNum.replace(/\s+/g, "");
+
+    if (newNum[3] == '0') {
+      formattedNum = newNum.slice(0,3) + newNum.slice(4);
     } else {
-      formattedNum = phoneNum;
-    }
-    
-    const profile = {
-      phoneNum: formattedNum,
-      password
+      formattedNum = newNum;
     };
 
-    router.navigate({
-      pathname: 'verification',
-      params: profile
-    });
+    //Validate registered phone numbers
+    const data = await checkPhoneNum(formattedNum);
+
+    console.log(data);
+
+    //Navigate user to verification page if phone number does not exist
+    if (data.length == 0) {
+      const signIn = false;
+      
+      const profile = {
+        signIn,
+        phoneNum: formattedNum,
+        email,
+        password
+      };
+  
+      router.navigate({
+        pathname: 'verification',
+        params: profile
+      });
+    };
+  };
+
+  //Function to validate existing phone number in database
+  const checkPhoneNum = async (phone) => {
+    console.log(phone);
+
+    const { data, error } = await supabase
+      .from('accounts')
+      .select('*')
+      .like('phone', phone);
+
+    if (error) {
+      console.log("Unable to search phone number: ", error);
+      return null;
+    } else if (data.length === 0) {
+      //Proceed if phone number does not exist
+      console.log('No phone found in database.');
+      return data;
+    } else {
+      //Redirect user back to login page if phone number already exist in database
+      console.log('Phone number already registered.');
+      alert('Phone number already registered. Please login.');
+      router.navigate('login');
+      return data;
+    };
   };
 
   return (
     <KeyboardAvoidingView 
       keyboardVerticalOffset={-500}
       behavior={Platform.OS == "ios" ? "padding" : "height"}
-      style={{flex: 1, paddingTop: 35}}
+      style={{flex: 1, paddingTop: 50}}
     >
-      <ScrollView>
-        <TouchableOpacity style={{paddingLeft: 10}} onPress={() => router.navigate('login')}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <TouchableOpacity style={{paddingLeft: 10}} onPress={() => router.back()}>
           <Ionicons name="arrow-back-circle" size={40} color='black'/>
         </TouchableOpacity>
 
@@ -69,15 +166,34 @@ const Register = () => {
           <Text style={styles.title}>Registration</Text> 
 
           <Text style={styles.inputTitle}>PHONE NUMBER</Text>
+          { !phoneFormat ? (
+            null
+          ) : <Text style={[styles.warnText, {color: 'red'}]}>Numerical characters only</Text>}
+          { !phoneLength ? (
+            null
+          ) : <Text style={[styles.warnText, {color: 'red'}]}>Minimum 13 characters</Text>}
           <TextInput
             style={styles.input}
             value={phoneNum}
             onChangeText={handleChange}
             keyboardType='phone-pad'
           />
+          <Text style={styles.inputTitle}>EMAIL</Text>
+          { emailMatch ? (
+            null
+          ) : <Text style={[styles.warnText, {color: 'red'}]}>Incorrect format.</Text>}
+          <TextInput
+            style={styles.input}
+            value={email}
+            placeholder='Email address'
+            onChangeText={handleEmail}
+            keyboardType='email-address'
+          />
           <Text style={styles.inputTitle}>PASSWORD</Text>
           { passwordLength ? (
-            <Text style={[styles.warnText, {color: 'red'}]}>Password must have 8 characters.</Text>
+            <Text style={[styles.warnText, {color: 'red'}]}>
+              Password must have 8 characters.
+            </Text>
           ) : null}
           <TextInput
             style={styles.input}
@@ -100,9 +216,14 @@ const Register = () => {
             onChangeText={handleConfirmPassword}
           />
           <TouchableOpacity
-            style={styles.button}
+            style={[styles.button, {
+              backgroundColor: 
+                (!phoneNum || !password || !confirmedPassword || !emailMatch || !email || !passwordMatch) ?
+                'gray' :
+                'black'
+            }]}
             onPress={handleButtonPress}
-            disabled={!phoneNum || !password || !confirmedPassword}
+            disabled={!phoneNum || !password || !confirmedPassword || !emailMatch || !passwordMatch}
           >
             <Text style={styles.buttonText}>
               Next
@@ -111,13 +232,16 @@ const Register = () => {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
-    padding: 60
+    paddingLeft: 70,
+    paddingRight: 70,
+    paddingTop: 35,
+    paddingBottom: 50
   },
   title: {
     fontSize: 40,
@@ -149,7 +273,6 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     height: 50,
-    backgroundColor: 'black',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
@@ -162,4 +285,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Register
+export default Register;
