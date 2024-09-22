@@ -34,6 +34,8 @@ const Verification = () => {
     const [code, setCode] = useState(new Array(6).fill(''));
     const [session, setSession] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [timerButton, setTimerButton] = useState(true);
+    const [timer, setTimer] = useState(0);
 
     //OTP code input
     const inputs = [];
@@ -97,6 +99,9 @@ const Verification = () => {
 
     //Function to send user OTP
     const sendCode = async () => {
+        setTimerButton(true);
+        setTimer(60);
+
         if (signIn == 'true') {
             //Sign in user with OTP
             const {error} = await supabase.auth.signInWithOtp({
@@ -123,6 +128,17 @@ const Verification = () => {
                 console.log('Code sent successfully.');
             };
         };
+
+        const countdown = setInterval(() => {
+            setTimer(prevTimer => {
+                if (prevTimer < 1) {
+                    clearInterval(countdown);
+                    setTimerButton(false);
+                    return 0;
+                }
+                return prevTimer - 1;
+            });
+        }, 1000)
     };
 
     //Function to verify OTP
@@ -249,9 +265,10 @@ const Verification = () => {
                     <TouchableOpacity
                         style={styles.pressable}
                         onPress={sendCode}
+                        disabled={timerButton}
                     >
-                        <Text style={{textAlign: 'center'}}>
-                            Resend code
+                        <Text style={{textAlign: 'center', color: timerButton ? 'gray' : 'black'}}>
+                            Resend code ({timer})
                         </Text>
                     </TouchableOpacity>
                 </View>
