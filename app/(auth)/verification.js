@@ -31,10 +31,12 @@ const Verification = () => {
     const { signIn, phoneNum, email, password } = useLocalSearchParams();
 
     //useState hooks
-    const [code, setCode] = useState('');
+    const [code, setCode] = useState(new Array(6).fill(''));
     const [session, setSession] = useState(null);
-    const [disable, setDisable] = useState(true);
     const [loading, setLoading] = useState(false);
+
+    //OTP code input
+    const inputs = [];
 
     //Manage user session
     useEffect(() => {
@@ -66,26 +68,30 @@ const Verification = () => {
     }, [session]);
 
     //Function to format OTP
-    const handleOTP = (text) => {
-        if (text.length < 7) {
-            setCode(text);
-            if (text.length == 6) {
-                setDisable(false);
-            } else {
-                setDisable(true);
-            };
+    const handleOTP = (text, index) => {
+        if (text.length > 1) return;  // Ensures single digit entry
+        const newOtp = [...code];
+        newOtp[index] = text;
+        setCode(newOtp);
+
+        // Automatically focus the next input if available
+        if (text && index < 5) {
+            inputs[index + 1].focus();
         };
     };
+
+    //Set button disable if code is incomplete
+    const isButtonDisabled = code.some(value => value === '');
 
     //Function to re-format phone number for display
     const hiddenNum = (phoneNum) => {
         if (phoneNum.length == 12) {
             lastNum = phoneNum.slice(8);
-            formattedNum = '+60 1*-*** ' + lastNum;
+            formattedNum = '+60 1* - *** ' + lastNum;
         } else {
             lastNum = phoneNum.slice(9);
-            formattedNum = '+60 1*-**** ' + lastNum;
-        }
+            formattedNum = '+60 1* - **** ' + lastNum;
+        };
         return formattedNum;
     };
 
@@ -123,9 +129,11 @@ const Verification = () => {
     const checkCode = async () => {
         setLoading(true);
 
+        const strCode = code.join('');
+
         const {error} = await supabase.auth.verifyOtp({
             phone: phoneNum,
-            token: code,
+            token: strCode,
             type: 'sms'
         });
 
@@ -215,29 +223,35 @@ const Verification = () => {
                     <Text style={styles.pNum}>{hiddenNum(phoneNum)}</Text>
 
                     <Text style={styles.inputTitle}>ONE-TIME PASSWORD (OTP)</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={code}
-                        placeholder='XXX-XXX'
-                        onChangeText={handleOTP}
-                        keyboardType='numeric'
-                    />
+                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                        {code.map((digit, index) => (
+                            <TextInput
+                                key={index}
+                                ref={input => inputs[index] = input}
+                                style={styles.input}
+                                keyboardType="numeric"
+                                maxLength={1}
+                                onChangeText={text => handleOTP(text, index)}
+                                value={digit}
+                            />
+                        ))}
+                    </View>
                     
+                    <TouchableOpacity
+                        style={[styles.button, {backgroundColor: isButtonDisabled ? 'gray' : 'black'}]}
+                        onPress={checkCode}
+                        disabled={isButtonDisabled}
+                    >
+                        <Text style={styles.buttonText}>
+                            Next
+                        </Text>
+                    </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.pressable}
                         onPress={sendCode}
                     >
                         <Text style={{textAlign: 'center'}}>
-                        Resend code
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.button, {backgroundColor: disable ? 'gray' : 'black'}]}
-                        onPress={checkCode}
-                        disabled={disable}
-                    >
-                        <Text style={styles.buttonText}>
-                        Next
+                            Resend code
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -292,26 +306,23 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         color: 'black',
         marginTop: 30,
-        marginBottom: 3,
         textAlign: 'left',
-        paddingBottom: 3
+        paddingBottom: 10
     },
     input: {
-        width: '100%',
-        height: 50,
+        width: 40,
         borderColor: 'gray',
         borderWidth: 1,
         borderRadius: 8,
-        paddingLeft: 10,
-        marginBottom: 15
-    },
-    otpInput: {
-        width: '90%',
-        marginBottom: 20
+        padding: 5,
+        marginBottom: 15,
+        textAlign: 'center',
+        fontSize: 30,
+        fontWeight: '400'
     },
     pressable: {
         width: '50%',
-        marginBottom: 10,
+        marginTop: 30,
         backgroundColor: 'transparent',
         borderColor: 'transparent',
         alignSelf: 'center'
