@@ -11,5 +11,10 @@ module.exports = {
     sepolia: {
       url: `https://sepolia.infura.io/v3/${process.env.EXPO_PUBLIC_INFURA_PROJECT_ID}`
     }
+  },
+  etherscan: {
+    apiKey: {
+      sepolia: process.env.EXPO_PUBLIC_ETHERSCAN_API
+    }
   }
 };

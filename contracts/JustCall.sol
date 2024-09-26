@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
 
+// Author: @nigelgks
 contract JustCall {
     address public owner;
     
@@ -33,7 +34,7 @@ contract JustCall {
 
     //Validate phone number format
     modifier validatePhoneNum(string calldata _phoneNumber) {
-        require(bytes(_phoneNumber).length == 10, "Invalid phone number length.");
+        require(bytes(_phoneNumber).length >= 12 && bytes(_phoneNumber).length <= 13, "Invalid phone number length.");
         _;
     }
 
