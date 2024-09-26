@@ -10,7 +10,7 @@ import { View,
         } from 'react-native';
 
 //Import APIs and router
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '../../supabase/supabase';
 
 //Import vector icons
@@ -19,6 +19,9 @@ import { Ionicons } from '@expo/vector-icons';
 const Register = () => {
   //Expo router navigation
   const router = useRouter();
+
+  //Passed variables from previous page
+  const { name } = useLocalSearchParams();
   
   //useState hooks
   const [phoneNum, setPhoneNum] = useState('+60 ');
@@ -114,6 +117,7 @@ const Register = () => {
       
       const profile = {
         signIn,
+        name,
         phoneNum: formattedNum,
         email,
         password
@@ -165,6 +169,12 @@ const Register = () => {
         <View style={styles.container}>
           <Text style={styles.title}>Registration</Text> 
 
+          <Text style={styles.inputTitle}>FULL NAME</Text>
+          <TextInput
+            style={[styles.input, {backgroundColor: 'lightgray'}]}
+            placeholder={name}
+            editable={false}
+          />
           <Text style={styles.inputTitle}>PHONE NUMBER</Text>
           { !phoneFormat ? (
             null

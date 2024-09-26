@@ -28,7 +28,7 @@ const Verification = () => {
     const router = useRouter();
 
     //Passed variables from previous page
-    const { signIn, phoneNum, email, password } = useLocalSearchParams();
+    const { signIn, name, phoneNum, email, password } = useLocalSearchParams();
 
     //useState hooks
     const [code, setCode] = useState(new Array(6).fill(''));
@@ -187,7 +187,7 @@ const Verification = () => {
     const addAccount = async (userID, addr) => {
         const addData = {
             id: userID,
-            name: 'JANE DOE',
+            name,
             address: addr,
             phone: phoneNum
         };
