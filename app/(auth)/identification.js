@@ -24,9 +24,11 @@ const identification = () => {
   const [backTicket, setBackTicket] = useState('');
   const [token, setToken] = useState('');
 
+  //Fetch camera permission and env variable
   const [permission, requestPermission] = useCameraPermissions();
   const formURL = process.env.EXPO_PUBLIC_ANYFORM_KYC;
 
+  //Manage token
   useEffect(() => {
     const formData = new URLSearchParams();
     const password = 'Test123';
@@ -59,76 +61,76 @@ const identification = () => {
   //Function to open camera and capture image
   const openCamera = async (text) => {
     //Request camera permission
-    if (!permission.granted) {
-      try {
-        requestPermission();
-      } catch (error) {
-        console.log("Error encountered", error)
-      };
-      alert('Permission denied. We need camera permission to proceed.');
-      setOpen(0);
-    } else {
-      setOpen(1);
+    // if (!permission.granted) {
+    //   try {
+    //     requestPermission();
+    //   } catch (error) {
+    //     console.log("Error encountered", error)
+    //   };
+    //   alert('Permission denied. We need camera permission to proceed.');
+    //   setOpen(0);
+    // } else {
+    //   setOpen(1);
 
-      if (text == 'front') {
-        setFront(true);
-        setBack(false);
-      } else {
-        setFront(false);
-        setBack(true);
-      };
-    };
+    //   if (text == 'front') {
+    //     setFront(true);
+    //     setBack(false);
+    //   } else {
+    //     setFront(false);
+    //     setBack(true);
+    //   };
+    // };
   };
 
   //Function to handle image capture
   const captureImage = async () => {
-    if (cameraRef) {
-      setFront(false);
-      setBack(false);
-      setLoading(true);
+    // if (cameraRef) {
+    //   setFront(false);
+    //   setBack(false);
+    //   setLoading(true);
+    //   setOpen(false);
 
-      const image = await cameraRef.takePictureAsync();
+    //   const image = await cameraRef.takePictureAsync();
 
-      let formData = new FormData();
-      formData.append('token', token);
-      formData.append('file', {
-        uri: image.uri,
-        type: 'image/jpeg',
-        name: 'ic.jpg'
-      });
+    //   let formData = new FormData();
+    //   formData.append('token', token);
+    //   formData.append('file', {
+    //     uri: image.uri,
+    //     type: 'image/jpeg',
+    //     name: 'ic.jpg'
+    //   });
 
-      try {
-        const response = await fetch(`${formURL}/upload`, {
-          method: 'POST',
-          body: formData
-        });
+    //   try {
+    //     const response = await fetch(`${formURL}/upload`, {
+    //       method: 'POST',
+    //       body: formData
+    //     });
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Success:', data);
+    //     if (response.ok) {
+    //       const data = await response.json();
+    //       console.log('Success:', data);
 
-          if (data.result == 0) {
-            if (front) {
-              setFrontTicket(data.ticket);
-            };
-            if (back) {
-              setBackTicket(data.ticket);
-            };
+    //       if (data.result == 0) {
+    //         if (front) {
+    //           setFrontTicket(data.ticket);
+    //         };
+    //         if (back) {
+    //           setBackTicket(data.ticket);
+    //         };
             
-          } else {
-            alert('Unable to verify. Please try again.');
-          };
+    //       } else {
+    //         alert('Unable to verify. Please try again.');
+    //       };
 
-        } else {
-          console.error('Error:', response.status);
-        };
-      } catch (error) {
-        console.error('Error:', error);
-      };
+    //     } else {
+    //       console.error('Error:', response.status);
+    //     };
+    //   } catch (error) {
+    //     console.error('Error:', error);
+    //   };
 
-      setLoading(false);
-      setOpen(false);
-    };
+    //   setLoading(false);
+    // };
   };
 
   //Function to handle next button
@@ -142,37 +144,42 @@ const identification = () => {
     backFormData.append('ticket', frontTicket);
 
     try {
-      const responseFront = await fetch(`${formURL}/check`, {
-        method: 'POST',
-        body: frontFormData
+      // const responseFront = await fetch(`${formURL}/check`, {
+      //   method: 'POST',
+      //   body: frontFormData
+      // });
+
+      // const responseBack = await fetch(`${formURL}/check`, {
+      //   method: 'POST',
+      //   body: backFormData
+      // });
+
+      // if (responseFront.ok && responseBack.ok) {
+      //   const dataFront = await responseFront.json();
+      //   const dataBack = await responseBack.json();
+      //   const icFront = dataFront.pageList[0].photoList[0].result[0].text;
+      //   const name = dataFront.pageList[0].photoList[0].result[1].text;
+      //   const icBack = dataBack.pageList[0].photoList[0].result[0].text;
+
+      //   console.log(icFront, '=', icBack);
+      //   console.log('name:', name);
+
+      //   if (name && (icFront == icBack)) {
+      //     router.navigate({
+      //       pathname: 'register',
+      //       params: {name}
+      //     });
+      //   } else {
+      //     alert('Identity credentials did not match. Please try again.');
+      //   };
+      // } else {
+      //   console.error('Error:', responseFront.status, responseBack.status);
+      // };
+
+      router.navigate({
+        pathname: 'register',
+        params: {name: 'JOHN DOE'}
       });
-
-      const responseBack = await fetch(`${formURL}/check`, {
-        method: 'POST',
-        body: backFormData
-      });
-
-      if (responseFront.ok && responseBack.ok) {
-        const dataFront = await responseFront.json();
-        const dataBack = await responseBack.json();
-        const icFront = dataFront.pageList[0].photoList[0].result[0].text;
-        const name = dataFront.pageList[0].photoList[0].result[1].text;
-        const icBack = dataBack.pageList[0].photoList[0].result[0].text;
-
-        console.log(icFront, '=', icBack);
-        console.log('name:', name);
-
-        if (name && (icFront == icBack)) {
-          router.navigate({
-            pathname: 'register',
-            params: {name}
-          });
-        } else {
-          alert('Identity credentials did not match. Please try again.');
-        };
-      } else {
-        console.error('Error:', responseFront.status, responseBack.status);
-      };
     } catch (error) {
       console.error('Error:', error);
     };
@@ -235,9 +242,10 @@ const identification = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, {backgroundColor: (!frontTicket || !backTicket) ? 'gray' : 'black'}]}
+            // style={[styles.button, {backgroundColor: (!frontTicket || !backTicket) ? 'gray' : 'black'}]}
+            style={[styles.button, {backgroundColor: 'black'}]}
             onPress={handleValidation}
-            disabled={!frontTicket || !backTicket}
+            // disabled={!frontTicket || !backTicket}
           >
             <Text style={styles.buttonText}>
               Next
