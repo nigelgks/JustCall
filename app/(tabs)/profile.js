@@ -7,7 +7,8 @@ import { View,
          TextInput,
          KeyboardAvoidingView,
          ScrollView,
-         Modal
+         Modal,
+         ImageBackground
         } from 'react-native';
 
 //Import APIs and router
@@ -17,7 +18,7 @@ import '@walletconnect/react-native-compat';
 import { useWeb3ModalAccount } from '@web3modal/ethers-react-native';
 
 //Import vector icons
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign, Fontisto } from '@expo/vector-icons';
 import Octicons from '@expo/vector-icons/Octicons';
 
 const Profile = () => {
@@ -37,6 +38,7 @@ const Profile = () => {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
 
   //Set email format
   const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -132,6 +134,16 @@ const Profile = () => {
     setShowModal(false);
   };
 
+  //Function to show verification steps modal
+  const handleVerifyModal = () => {
+    setShowVerifyModal(true);
+  };
+
+  //Function to hide verification steps modal
+  const hideVerifyModal = () => {
+    setShowVerifyModal(false);
+  };
+
   //Function to handle logout activity
   const handleLogout = async () => {
     try {
@@ -221,6 +233,67 @@ const Profile = () => {
           </View>
         </Modal>
       )}
+
+      {showVerifyModal && (
+        <Modal
+          transparent={true}
+          animationType='fade'
+          visible={showVerifyModal}
+          onRequestClose={() => showVerifyModal(false)}
+        >
+          <View style={styles.modalBackground}>
+            <View style={[styles.modalWrapper, {height: 600}]}>
+              <Text style={[styles.modalText, {
+                padding: 5,
+                marginBottom: 12,
+                borderRadius: 10,
+                fontWeight: 'bold',
+                fontSize: 18,
+                borderWidth: 2
+              }]}>
+                Verification steps
+              </Text>
+
+              <ScrollView horizontal={true} style={{flexDirection: 'row'}} showsHorizontalScrollIndicator={false}>
+                <View style={styles.modalContent}>
+                  <ImageBackground
+                    source={require('../../assets/images/logout.jpg')}
+                    style={styles.image}
+                    imageStyle={{borderRadius: 40}}
+                  />
+                  <Text style={styles.modalContentText}>Sign out</Text>
+                </View>
+                <View style={styles.modalContent}>
+                  <ImageBackground
+                    source={require('../../assets/images/inbox.jpg')}
+                    style={styles.image}
+                    imageStyle={{borderRadius: 40}}
+                  />
+                  <Text style={styles.modalContentText}>Verify your email</Text>
+                </View>
+                <View style={styles.modalContent}>
+                  <ImageBackground
+                    source={require('../../assets/images/login.jpg')}
+                    style={styles.image}
+                    imageStyle={{borderRadius: 40}}
+                  />
+                  <Text style={styles.modalContentText}>Log in</Text>
+                </View>
+              </ScrollView>
+              
+              <TouchableOpacity style={{
+                flex: 1,
+                justifyContent: 'flex-end',
+                alignItems: 'center'
+              }}
+                onPress={hideVerifyModal}
+              >
+                <Fontisto name="close" size={28} color="black"/>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
       
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.topContainer}>
@@ -240,10 +313,10 @@ const Profile = () => {
                 <Text style={[styles.verifyText, {color: 'white'}]}>Account verified.</Text>
               </>
             ) : (
-              <>
+              <TouchableOpacity style={{flexDirection: 'row'}} onPress={handleVerifyModal}>
                 <Octicons name="unverified" size={24} color="black" />
                 <Text style={styles.verifyText}>Account unverified.</Text>
-              </>
+              </TouchableOpacity>
             )}
           </View>
 
@@ -334,7 +407,8 @@ const styles = StyleSheet.create({
   modalWrapper: {
     padding: 20,
     borderRadius: 10,
-    width: 300
+    width: 370,
+    backgroundColor: 'white'
   },
   modalText: {
     textAlign:'center'
@@ -344,6 +418,23 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: '45%',
     alignItems: 'center'
+  },
+  modalContent: {
+    padding: 20,
+    width: 330,
+    height: 450,
+    justifyContent: 'flex-end',
+    alignItems: 'center'
+  },
+  modalContentText: {
+    paddingTop: 50,
+    fontSize: 20,
+    fontWeight: '500'
+  },
+  image: {
+    width: '100%',
+    height: 300,
+    alignSelf: 'center'
   },
   header: {
     flexDirection: 'row',
