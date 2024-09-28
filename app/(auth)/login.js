@@ -11,12 +11,21 @@ import { View,
 //Import APIs and router
 import { useRouter } from 'expo-router';
 import { supabase } from '../../supabase/supabase';
+import { ethers, BrowserProvider } from 'ethers';
 import '@walletconnect/react-native-compat';
-import { useWeb3ModalAccount } from '@web3modal/ethers-react-native';
+import { useAppKitAccount,
+         useAppKitProvider
+       } from '@reown/appkit-ethers-react-native';
+
+//Setup contract ABI and address
+const contract = require("../../artifacts/contracts/JustCall.sol/JustCall.json");
+const abi = contract.abi;
+const contractAddress = process.env.EXPO_PUBLIC_CONTRACT_ADDR;
 
 const Login = () => {
-  //Retrieve connected wallet address
-  const { address } = useWeb3ModalAccount();
+  //Get wallet connection status and provider
+  const { address } = useAppKitAccount();
+  const { walletProvider } = useAppKitProvider();
 
   //Expo router navigation
   const router = useRouter();
@@ -107,11 +116,14 @@ const Login = () => {
       setPhoneNum('+60 ');
       setPassword('');
     };
+
     setLoading(false);
   };
 
   //Function to handle registration operation
   const handleRegister = async () => {
+    setLoading(true);
+
     const data = await checkAddress(address, true);
 
     if (data.length === 0) {
@@ -121,10 +133,14 @@ const Login = () => {
       //Show alert if wallet address is already registered
       alert(`User wallet [${address}] is already registered. Please log in.`);
     };
+
+    setLoading(false);
   };
 
   //Function to navigate to OTP verification page
   const handleOTP = async () => {
+    setLoading(true);
+
     const data = await checkAddress(address, false);
 
     //Proceed login with OTP if wallet address already registered
@@ -151,31 +167,60 @@ const Login = () => {
       setPhoneNum('+60 ');
       setPassword('');
     };
+
+    setLoading(false);
   };
 
   //Check whether wallet address already exist in database
   const checkAddress = async (addr, register) => {
-    const { data, error } = await supabase
+    const provider = new BrowserProvider(walletProvider);
+    const signer = await provider.getSigner();
+    const justCall = new ethers.Contract(contractAddress, abi, signer);
+
+    try {
+      const profile = await justCall.getUserByAddress();
+      console.log("Profile: ", profile);
+
+      const { data } = await supabase
       .from('accounts')
       .select('*')
       .like('address', addr);
 
-    if (error) {
-      console.log("Unable to search address: ", error);
-      return null;
-    } else if (data.length === 0) {
-      //Address does not exist in database
-      console.log('No address found in database.');
-      if (register == false) {
-        //Navigate user back to wallet page if address is not registered
-        alert('Address does not exist in database. Please select another wallet.');
-        router.back();
+      if (data.length === 0) {
+        //Address does not exist in database
+        console.log('No address found in database.');
+        if (register == false) {
+          //Navigate user back to wallet page if address is not registered
+          alert('Address does not exist in database. Please select another wallet.');
+          router.back();
+        };
+        return data;
+      } else {
+        //Address already exist in database
+        console.log('Address found in database:', data);
+
+        if (data[0].phone != profile[1]) {
+          console.log('Mismatched phone number:', data[0].phone, '!=', profile[1]);
+          alert('Mismatched phone number linked to connected wallet address.');
+          return null;
+        } else {
+          return data;
+        };
       };
-      return data;
-    } else {
-      //Address already exist in database
-      console.log('Address found in database:', data);
-      return data;
+    } catch (error) {
+      if (error.message.includes('User does not exist.')) {
+        if (register == false) {
+          console.log('User does not exist. Re-routing back to wallet page.');
+          alert('No user is registered with this address. Please select another wallet.');
+          router.back();
+        } else {
+          return [];
+        };
+      } else {
+        console.log('Error fetching address:', error);
+        alert('Error fetching address:', error);
+      };
+      return null;
     };
   };
 
