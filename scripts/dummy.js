@@ -2,18 +2,20 @@
 //const contract = require("../artifacts/contracts/JustCall.sol/JustCall.json");
 //const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
 //const abi = contract.abi;
-//const JustCall = new ethers.Contract(contractAddress, abi, provider);
+
 
 const {ethers} = require('hardhat');
 const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 async function main() {
-    //Establish contract
-    const JustCall = await ethers.getContractFactory("JustCall");
-
     //Fetch signers and assign
     const [owner, addr1, addr2] = await ethers.getSigners();
     const user = owner;
+    const removeUser = addr1;
+
+    //Establish contract
+    const JustCall = await ethers.getContractFactory("JustCall");
+    //const JustCall = new ethers.Contract(contractAddress, abi, provider);
 
     //Attach user to contract
     const justCall = JustCall.attach(contractAddress).connect(user);
@@ -29,7 +31,7 @@ async function main() {
 
     //Register new user
     try {
-        await justCall.register("John Doe", "1234567890");
+        await justCall.register("JOHN DOE", "+60198781785");
     } catch(error) {
         //Throw revereted error if user already exist
         if (error.message.includes('User already registered.')) {
@@ -46,7 +48,7 @@ async function main() {
 
     //Remove user (owner only)
     // try {
-    //     await justCall.removeUser(addr1.address);
+    //     await justCall.removeUser(removeUser.address);
     // } catch(error) {
     //     if (error.message.includes('Only the contract administrator can call this function.')) {
     //         console.log("Only the contract administrator can call this function.");
@@ -60,7 +62,7 @@ async function main() {
 
     //Get user's name given phone number
     // try {
-    //     const profilePhone = await justCall.getUserByPhoneNumber("1234567890");
+    //     const profilePhone = await justCall.getUserByPhoneNumber("+60198781785");
     //     console.log("user: ", profilePhone);
     // } catch (error) {
     //     if (error.message.includes('Invalid phone number length.')) {
