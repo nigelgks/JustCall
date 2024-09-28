@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   },
   desc: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '400',
     color: 'black',
     marginBottom: 30,

@@ -340,8 +340,8 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     paddingHorizontal: 50,
-    paddingTop: 35,
-    paddingBottom: 55
+    paddingTop: 55,
+    paddingBottom: 25
   },
   title: {
     fontSize: 40,
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center'
   },
   desc: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '400',
     textAlign: 'center',
     color: 'black',
