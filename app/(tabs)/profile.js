@@ -15,7 +15,7 @@ import { View,
 import { useRouter } from 'expo-router';
 import { supabase } from '../../supabase/supabase';
 import '@walletconnect/react-native-compat';
-import { useWeb3ModalAccount } from '@web3modal/ethers-react-native';
+import { useAppKitAccount } from '@reown/appkit-ethers-react-native';
 
 //Import vector icons
 import { AntDesign, Fontisto } from '@expo/vector-icons';
@@ -23,7 +23,7 @@ import Octicons from '@expo/vector-icons/Octicons';
 
 const Profile = () => {
   //Retrieve connected wallet address
-  const { address } = useWeb3ModalAccount();
+  const { address } = useAppKitAccount();
 
   //Expo router navigation
   const router = useRouter();
