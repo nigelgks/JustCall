@@ -6,17 +6,30 @@ import { View,
          TextInput,
          KeyboardAvoidingView,
          Platform,
-         ScrollView
+         ScrollView,
+         Modal,
+         ActivityIndicator
         } from 'react-native';
 
 //Import APIs and router
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '../../supabase/supabase';
+import { ethers, BrowserProvider } from 'ethers';
+import '@walletconnect/react-native-compat';
+import { useAppKitProvider } from '@reown/appkit-ethers-react-native';
 
 //Import vector icons
 import { Ionicons } from '@expo/vector-icons';
 
+//Setup contract ABI and address
+const contract = require("../../artifacts/contracts/JustCall.sol/JustCall.json");
+const abi = contract.abi;
+const contractAddress = process.env.EXPO_PUBLIC_CONTRACT_ADDR;
+
 const Register = () => {
+  //Get wallet provider
+  const { walletProvider } = useAppKitProvider();
+
   //Expo router navigation
   const router = useRouter();
 
@@ -24,6 +37,7 @@ const Register = () => {
   const { name } = useLocalSearchParams();
   
   //useState hooks
+  const [loading, setLoading] = useState(false);
   const [phoneNum, setPhoneNum] = useState('+60 ');
   const [phoneFormat, setPhoneFormat] = useState(false);
   const [phoneLength, setPhoneLength] = useState(false);
@@ -97,6 +111,8 @@ const Register = () => {
 
   //Function to manage next button
   const handleButtonPress = async () => {
+    setLoading(true);
+
     //Re-format phone number
     newNum = phoneNum.replace(/\s+/g, "");
 
@@ -128,46 +144,98 @@ const Register = () => {
         params: profile
       });
     };
+
+    setLoading(false);
   };
 
   //Function to validate existing phone number in database
   const checkPhoneNum = async (phone) => {
     console.log(phone);
 
-    const { data, error } = await supabase
+    const provider = new BrowserProvider(walletProvider);
+    const signer = await provider.getSigner();
+    const justCall = new ethers.Contract(contractAddress, abi, signer);
+
+    try {
+      //Fetch phone number from blockchain
+      const profilePhone = await justCall.getUserByPhoneNumber("+60198781785");
+      console.log("User: ", profilePhone);
+
+      //Second stage check database
+      const { data } = await supabase
       .from('accounts')
       .select('*')
       .like('phone', phone);
 
-    if (error) {
-      console.log("Unable to search phone number: ", error);
-      return null;
-    } else if (data.length === 0) {
-      //Proceed if phone number does not exist
-      console.log('No phone found in database.');
-      return data;
-    } else {
-      //Redirect user back to login page if phone number already exist in database
-      console.log('Phone number already registered.');
-      alert('Phone number already registered. Please login.');
+      if (data.length === 0) {
+        //Mismatched data exist
+        console.log('Warning: Mismatched data exist!');
+        alert('Warning: Mismatched data exist!');
+      } else {
+        //Phone number already exist in database and blockchain
+        console.log('Phone number already registered.');
+        alert('Phone number already registered. Please login.');
+      };
+
+      //Redirect user back to login page
       router.navigate('login');
-      return data;
+      return null;
+    } catch (error) {
+      if (error.message.includes('Invalid phone number length.')) {
+        console.log('Invalid phone number length.');
+        alert('Invalid phone number length. Make sure it follows the correct format.');
+        return null;
+      } else if (error.message.includes('Phone number is not registered')) {
+        //Second stage check database
+        const { data } = await supabase
+        .from('accounts')
+        .select('*')
+        .like('phone', phone);
+
+        if (data.length === 0) {
+          //Proceed if phone number does not exist
+          console.log('Phone number is not registered');
+          return data;
+        } else {
+          //Redirect user back to login page if mismatched data exist
+          console.log('Warning: Mismatched data exist!');
+          alert('Warning: Mismatched data exist!');
+          router.navigate('login');
+          return data;
+        };
+      } else {
+        console.log('Error fetching phone number:', error);
+        return null;
+      };
     };
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       keyboardVerticalOffset={-500}
       behavior={Platform.OS == "ios" ? "padding" : "height"}
-      style={{flex: 1, paddingTop: 50}}
+      style={{paddingTop: 50}}
     >
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <TouchableOpacity style={{paddingLeft: 10}} onPress={() => router.back()}>
-          <Ionicons name="arrow-back-circle" size={40} color='black'/>
-        </TouchableOpacity>
+      {loading && (
+        <Modal
+          transparent={true}
+          animationType='fade'
+          visible={loading}
+          onRequestClose={() => setLoading(false)}
+        >
+          <View style={styles.modalBackground}>
+            <View style={styles.loadingWrapper}>
+              <ActivityIndicator size='large' color='white'/>
+              <Text style={{color: 'white', fontWeight: '400'}}>Loading...</Text>
+            </View>
+          </View>
+        </Modal>
+      )}
 
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
           <Text style={styles.title}>Registration</Text> 
+          <Text style={styles.desc}>Please ensure your name below is correct. Scan again if it is incorrect.</Text>
 
           <Text style={styles.inputTitle}>FULL NAME</Text>
           <TextInput
@@ -239,6 +307,14 @@ const Register = () => {
               Next
             </Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.pressable}
+            onPress={() => router.back()}
+          >
+            <Text style={{fontSize: 15, fontWeight: '500', textAlign: 'center', color: 'royalblue'}}>
+              Incorrect Name? Scan Again
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -246,18 +322,40 @@ const Register = () => {
 };
 
 const styles = StyleSheet.create({
+  modalBackground: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)'
+  },
+  loadingWrapper: {
+      backgroundColor: 'black',
+      height: 100,
+      width: 100,
+      borderRadius: 10,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+  },
   container: {
     justifyContent: 'center',
-    paddingLeft: 70,
-    paddingRight: 70,
+    paddingHorizontal: 50,
     paddingTop: 35,
-    paddingBottom: 50
+    paddingBottom: 55
   },
   title: {
     fontSize: 40,
     fontWeight: 'bold',
     color: 'black',
-    marginBottom: 45,
+    marginBottom: 5,
+    alignSelf: 'center'
+  },
+  desc: {
+    fontSize: 16,
+    fontWeight: '400',
+    textAlign: 'center',
+    color: 'black',
+    marginBottom: 30,
     alignSelf: 'center'
   },
   inputTitle: {
@@ -292,7 +390,14 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold'
-  }
+  },
+  pressable: {
+      width: '100%',
+      marginTop: 25,
+      backgroundColor: 'transparent',
+      borderColor: 'transparent',
+      alignSelf: 'center'
+  },
 });
 
 export default Register;

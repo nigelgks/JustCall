@@ -15,14 +15,11 @@ import { View,
 import { useLocalSearchParams, useRouter } from 'expo-router/build';
 import { supabase } from '../../supabase/supabase';
 import '@walletconnect/react-native-compat';
-import { useWeb3ModalAccount } from '@web3modal/ethers-react-native';
-
-//Import vector icons
-import { Ionicons } from '@expo/vector-icons';
+import { useAppKitAccount } from '@reown/appkit-ethers-react-native';
 
 const Verification = () => {
     //Retrieve connected wallet address
-    const { address } = useWeb3ModalAccount();
+    const { address } = useAppKitAccount();
     
     //Expo router navigation
     const router = useRouter();
@@ -226,11 +223,7 @@ const Verification = () => {
                 </Modal>
             )}
 
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <TouchableOpacity style={{paddingLeft: 10}} onPress={() => router.back()}>
-                    <Ionicons name="arrow-back-circle" size={40} color='black'/>
-                </TouchableOpacity>
-
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{flex: 1, justifyContent: 'center'}}>
                 <View style={styles.container}>
                     <Text style={styles.title}>Phone Number Verification</Text>
                     <Text style={styles.desc}>Verification code has been sent to you.</Text>
@@ -279,8 +272,7 @@ const Verification = () => {
 
 const styles = StyleSheet.create({
     container: {
-        justifyContent: 'center',
-        padding: 60
+        paddingHorizontal: 60
     },
     modalBackground: {
         flex: 1,
