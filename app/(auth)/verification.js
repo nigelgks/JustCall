@@ -14,12 +14,19 @@ import { View,
 //Import APIs and router
 import { useLocalSearchParams, useRouter } from 'expo-router/build';
 import { supabase } from '../../supabase/supabase';
+import { ethers, BrowserProvider } from 'ethers';
 import '@walletconnect/react-native-compat';
-import { useAppKitAccount } from '@reown/appkit-ethers-react-native';
+import { useAppKitAccount, useAppKitProvider } from '@reown/appkit-ethers-react-native';
+
+//Setup contract ABI and address
+const contract = require("../../artifacts/contracts/JustCall.sol/JustCall.json");
+const abi = contract.abi;
+const contractAddress = process.env.EXPO_PUBLIC_CONTRACT_ADDR;
 
 const Verification = () => {
-    //Retrieve connected wallet address
+    //Get wallet connection status and provider
     const { address } = useAppKitAccount();
+    const { walletProvider } = useAppKitProvider();
     
     //Expo router navigation
     const router = useRouter();
@@ -157,11 +164,10 @@ const Verification = () => {
             const {data} = await supabase.auth.getSession();
 
             if (signIn != 'true') {
-                await addEmail();
-                await addAccount(data.session.user.id, address);
+                await addAccount(data, address);
+            } else {
+                setSession(data.session);
             };
-            
-            setSession(data.session);
         };
 
         setLoading(false);
@@ -180,24 +186,58 @@ const Verification = () => {
         };
     };
 
-    //Function to add user information in database
-    const addAccount = async (userID, addr) => {
-        const addData = {
-            id: userID,
-            name,
-            address: addr,
-            phone: phoneNum
-        };
-        
-        const {error} = await supabase
-            .from('accounts')
-            .insert([addData])
-            .select();
-        
-        if (error) {
-            console.log('Unable to update user table:', error);
-        } else {
-            console.log('User table updated.');
+    //Function to add user information in database and blockchain
+    const addAccount = async (data, addr) => {
+        const provider = new BrowserProvider(walletProvider);
+        const signer = await provider.getSigner();
+        const justCall = new ethers.Contract(contractAddress, abi, signer);
+
+        try {
+            await justCall.register(name, phoneNum);
+
+            await addEmail();
+
+            const addData = {
+                id: data.session.user.id,
+                name,
+                address: addr,
+                phone: phoneNum
+            };
+            
+            const {error} = await supabase
+                .from('accounts')
+                .insert([addData])
+                .select();
+            
+            if (error) {
+                console.log('Unable to update user table:', error);
+                alert('Error encountered. Please try again.');
+            } else {
+                console.log('User table updated.');
+                setSession(data.session);
+            };
+        } catch (error) {
+            //Throw revereted error if user already exist
+            if (error.message.includes('User already registered.')) {
+                console.log('User already registered.');
+                alert('User already registered.');
+                router.navigate('login');
+            } else if (error.message.includes('Phone number already registered')) {
+                console.log('Phone number already registered.');
+                alert('Phone number already registered.');
+                router.navigate('login');
+            } else if (error.message.includes('Invalid phone number length.')) {
+                console.log('Invalid phone number length.');
+                alert('Invalid phone number length.');
+                router.back();
+            } else if (error.code === 'ACTION_REJECTED') {
+                console.log('Transaction rejected.');
+                alert('Transaction rejected.');
+                router.navigate('login');
+            } else {
+                console.log('Error registering failed:', error);
+                alert('Error encountered. Please try again.');
+            };
         };
     };
 

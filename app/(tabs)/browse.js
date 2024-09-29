@@ -19,9 +19,25 @@ import Contacts from 'react-native-contacts';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Fontisto from '@expo/vector-icons/Fontisto';
 
+//Import APIs and router
+import { ethers, BrowserProvider } from 'ethers';
+import '@walletconnect/react-native-compat';
+import { useAppKitProvider } from '@reown/appkit-ethers-react-native';
+
+//Setup contract ABI and address
+const contract = require("../../artifacts/contracts/JustCall.sol/JustCall.json");
+const abi = contract.abi;
+const contractAddress = process.env.EXPO_PUBLIC_CONTRACT_ADDR;
+
 const Browse = () => {
+  //Get wallet connection status and provider
+  const { walletProvider } = useAppKitProvider();
+
   //useState hooks
   const [search, setSearch] = useState('');
+  const [formatted, setFormatted] = useState('');
+  const [num, setNum] = useState('');
+  const [name, setName] = useState('');
   const [contacts, setContacts] = useState(null);
   const [filteredcontactLists, setFilteredcontactLists] = useState(null);
   const [disable, setDisable] = useState(true);
@@ -41,20 +57,59 @@ const Browse = () => {
         
         if (value === 'granted') {
           //Fetch contacts from device
-          Contacts.getAll().then(setContacts);
-          console.log('Contact list permission allowed.')
+          fetchAndCleanContacts();
+          console.log('Contact list permission allowed.');
         };
       } else {
-        Contacts.getAll().then(setContacts);
+        fetchAndCleanContacts();
       };
     };
     requestPermission();
   }, []);
 
+  //Function to clean phone number format
+  const cleanPhoneNumber = (phoneNumber) => {
+    // Step 1: Remove any non-numeric characters (except for '+')
+    let cleanedNumber = phoneNumber.replace(/[^0-9+]/g, '');
+  
+    // Step 2: Ensure the number starts with +601 (for Malaysian numbers)
+    if (cleanedNumber.startsWith('0')) {
+      // Replace '0' at the beginning with '0'
+      cleanedNumber = cleanedNumber.replace(/^0/, '+60');
+    } else if (cleanedNumber.startsWith('60')) {
+      // Replace '60' at the beginning with '+60'
+      cleanedNumber = cleanedNumber.replace(/^60/, '+60');
+    };
+  
+    return cleanedNumber;
+  };
+
+  const fetchAndCleanContacts = async () => {
+    try {
+      const contacts = await Contacts.getAll();
+  
+      // Process and clean phone numbers
+      const cleanedContacts = contacts.map((contact) => {
+        if (contact.phoneNumbers && contact.phoneNumbers.length > 0) {
+          contact.phoneNumbers = contact.phoneNumbers.map((phoneNumber) => ({
+            ...phoneNumber,
+            number: cleanPhoneNumber(phoneNumber.number),
+          }));
+        }
+        return contact;
+      });
+  
+      // Set the cleaned contacts into state (or process further)
+      setContacts(cleanedContacts);
+    } catch (error) {
+      console.error('Error fetching contacts:', error);
+    }
+  };
+
   //Function to handle search bar
   const handleSearch = (text) => {
     //Limit search result maximum length
-    if (text.length < 15) {
+    if (text.length < 14) {
       setSearch(text);
     };
     
@@ -78,13 +133,45 @@ const Browse = () => {
   };
 
   //Activate search modal
-  const handleShowModal = () => {
-    setShowModal(true);
+  const handleShowModal = async () => {
+    setLoading(true);
+
+    try {
+      // Clean the phone number before calling the contract
+      const cleanedPhoneNumber = await cleanPhoneNumber(search);
+
+      // Update state with the cleaned phone number (optional)
+      setSearch(cleanedPhoneNumber);
+
+      const provider = new BrowserProvider(walletProvider);
+      const signer = await provider.getSigner();
+      const justCall = new ethers.Contract(contractAddress, abi, signer);
+
+      const profile = await justCall.getUserByPhoneNumber(cleanedPhoneNumber);
+      console.log("User: ", profile);
+      setName(profile[0]);
+      setNum(profile[1]);
+      setShowModal(true);
+    } catch (error) {
+        if (error.message.includes('Invalid phone number length.')) {
+            console.log('Invalid phone number length.');
+            alert('Invalid phone number length.');
+        } else if (error.message.includes('Phone number is not registered')) {
+            console.log('Phone number is not registered.');
+            alert('Phone number is not registered.');
+        } else {
+            console.log('Error:', error);
+        };
+    };
+
+    setLoading(false);
   };
 
   //Hide search modal
   const handleHideModal = () => {
     setShowModal(false);
+    setName('');
+    setNum('');
   };
 
   return (
@@ -113,10 +200,10 @@ const Browse = () => {
           onRequestClose={() => setShowModal(false)}
         >
           <View style={styles.modalBackground}>
-            <View style={styles.loadingWrapper}>
+            <View style={styles.modalWrapper}>
               <View style={{justifyContent: 'center'}}>
-                <Text style={styles.nameText}>Al-Sultan Abdullah Ri'ayatuddin Al-Mustafa Billah Shah ibni Almarhum Sultan Haji Ahmad Shah</Text>
-                <Text style={styles.phoneText}>+6001987817855</Text>
+                <Text style={styles.nameText}>{name}</Text>
+                <Text style={styles.phoneText}>{num}</Text>
               </View>
               <TouchableOpacity style={{paddingTop: 20}} onPress={handleHideModal}>
                 <Fontisto name="close" size={25} color="black"/>
@@ -183,26 +270,35 @@ const styles = StyleSheet.create({
     paddingTop: 70
   },
   modalBackground: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)'
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)'
   },
   loadingWrapper: {
-      backgroundColor: 'white',
-      width: 300,
-      borderRadius: 10,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingBottom: 20,
-      paddingTop: 15,
-      paddingHorizontal: 20
+    backgroundColor: 'black',
+    height: 100,
+    width: 100,
+    borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalWrapper: {
+    backgroundColor: 'white',
+    width: 300,
+    borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: 20,
+    paddingTop: 15,
+    paddingHorizontal: 20
   },
   nameText: {
     fontSize: 20,
     fontWeight: 'bold',
-    paddingBottom: 20,
+    marginBottom: 10,
     textAlign: 'center'
   },
   phoneText: {

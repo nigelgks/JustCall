@@ -18,9 +18,6 @@ import { ethers, BrowserProvider } from 'ethers';
 import '@walletconnect/react-native-compat';
 import { useAppKitProvider } from '@reown/appkit-ethers-react-native';
 
-//Import vector icons
-import { Ionicons } from '@expo/vector-icons';
-
 //Setup contract ABI and address
 const contract = require("../../artifacts/contracts/JustCall.sol/JustCall.json");
 const abi = contract.abi;
