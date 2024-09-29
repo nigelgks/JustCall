@@ -9,7 +9,8 @@ import { View,
          PermissionsAndroid,
          ImageBackground,
          Modal,
-         ActivityIndicator
+         ActivityIndicator,
+         Linking
         } from 'react-native';
 
 //Import contact list manager package
@@ -23,6 +24,7 @@ import Fontisto from '@expo/vector-icons/Fontisto';
 import { ethers, BrowserProvider } from 'ethers';
 import '@walletconnect/react-native-compat';
 import { useAppKitProvider } from '@reown/appkit-ethers-react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 //Setup contract ABI and address
 const contract = require("../../artifacts/contracts/JustCall.sol/JustCall.json");
@@ -35,7 +37,6 @@ const Browse = () => {
 
   //useState hooks
   const [search, setSearch] = useState('');
-  const [formatted, setFormatted] = useState('');
   const [num, setNum] = useState('');
   const [name, setName] = useState('');
   const [contacts, setContacts] = useState(null);
@@ -49,19 +50,39 @@ const Browse = () => {
     //Function to manage access permission to contacts
     const requestPermission = async () => {
       if (Platform.OS === 'android') {
-        const value = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS, {
-          title: 'Contacts Permission',
-          message: 'JustCall would like to access your contacts.',
-          buttonPositive: 'Allow',
-        });
-        
-        if (value === 'granted') {
-          //Fetch contacts from device
-          fetchAndCleanContacts();
-          console.log('Contact list permission allowed.');
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.CALL_PHONE,
+            {
+              title: 'Phone Call Permission',
+              message: 'JustCall needs access to make phone calls.',
+              buttonNeutral: 'Ask Me Later',
+              buttonNegative: 'Cancel',
+              buttonPositive: 'Allow',
+            },
+          );
+
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            console.log('Phone call permission allowed.');
+          } else {
+            console.log('Phone call permission denied.');
+          };
+
+          const value = await PermissionsAndroid
+          .request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS, {
+            title: 'Contacts Permission',
+            message: 'JustCall would like to access your contacts.',
+            buttonPositive: 'Allow',
+          });
+          
+          if (value === 'granted') {
+            //Fetch contacts from device
+            fetchAndCleanContacts();
+            console.log('Contact list permission allowed.');
+          };
+        } catch (error) {
+          console.log(error);
         };
-      } else {
-        fetchAndCleanContacts();
       };
     };
     requestPermission();
@@ -95,7 +116,7 @@ const Browse = () => {
             ...phoneNumber,
             number: cleanPhoneNumber(phoneNumber.number),
           }));
-        }
+        };
         return contact;
       });
   
@@ -103,7 +124,7 @@ const Browse = () => {
       setContacts(cleanedContacts);
     } catch (error) {
       console.error('Error fetching contacts:', error);
-    }
+    };
   };
 
   //Function to handle search bar
@@ -124,7 +145,7 @@ const Browse = () => {
       //Filter contact list based on search result
       const filteredData = contacts.filter(contacts =>
         contacts.phoneNumbers.length > 0 && contacts.phoneNumbers[0].number.includes(text)
-      );
+      ).sort((a, b) => a.displayName.localeCompare(b.displayName));
       setFilteredcontactLists(filteredData);
     } else {
       setFilteredcontactLists(null);
@@ -174,6 +195,12 @@ const Browse = () => {
     setNum('');
   };
 
+  const handleCall = (num) => {
+    if (Platform.OS === 'android') {
+      Linking.openURL(`tel:${num}`);
+    };
+  };
+
   return (
     <View style={styles.container}>
       {loading && (
@@ -202,12 +229,22 @@ const Browse = () => {
           <View style={styles.modalBackground}>
             <View style={styles.modalWrapper}>
               <View style={{justifyContent: 'center'}}>
+                <Text style={styles.verifyText}>Verified</Text>
                 <Text style={styles.nameText}>{name}</Text>
                 <Text style={styles.phoneText}>{num}</Text>
               </View>
-              <TouchableOpacity style={{paddingTop: 20}} onPress={handleHideModal}>
-                <Fontisto name="close" size={25} color="black"/>
-              </TouchableOpacity>
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity onPress={handleHideModal}>
+                  <Fontisto name="close" size={33} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.callButton, {borderWidth: 2.8}]}
+                  onPress={() => handleCall(num)}
+                >
+                  <Ionicons name="call" size={22} color="black"/>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </Modal>
@@ -240,10 +277,23 @@ const Browse = () => {
             data={filteredcontactLists}
             keyExtractor={(item) => item.rawContactId}
             renderItem={({ item }) => (
-              <TouchableOpacity style={styles.contactListItem} disabled={true}>
-                <Text style={styles.contactListName}>{item.displayName}</Text>
-                <Text style={styles.contactListPhone}>{item.phoneNumbers[0].number}</Text>
-              </TouchableOpacity>
+              <View style={styles.contactListItem} disabled={true}>
+                <View>
+                  <Text style={styles.contactListName}>{item.displayName}</Text>
+                  <Text style={styles.contactListPhone}>
+                    {item.phoneNumbers[0].number}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={[
+                    styles.callButton, 
+                    {height: 40, width: 40, borderWidth: 2}
+                  ]} 
+                  onPress={() => handleCall(item.phoneNumbers[0].number)}
+                >
+                  <Ionicons name="call" size={25} color="black"/>
+                </TouchableOpacity>
+              </View>
             )}
           />
         ) : (
@@ -291,9 +341,28 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingBottom: 20,
+    paddingBottom: 15,
     paddingTop: 15,
     paddingHorizontal: 20
+  },
+  modalButtons: {
+    paddingTop: 20,
+    flexDirection: 'row',
+    alignContent: 'space-between',
+    alignSelf: 'center'
+  },
+  verifyText: {
+    alignSelf: 'center',
+    width: '100%',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginBottom: 16,
+    paddingHorizontal: 15,
+    paddingVertical: 3,
+    backgroundColor: 'darkcyan',
+    color: 'white',
+    borderRadius: 20,
   },
   nameText: {
     fontSize: 20,
@@ -305,6 +374,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '400',
     textAlign: 'center'
+  },
+  callButton: {
+    padding: 3,
+    marginLeft: 50,
+    backgroundColor: 'transparent',
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   topContainer: {
     alignContent: 'center',
@@ -340,6 +417,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 10,
     elevation: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
   },
   contactListName: {
     fontSize: 18,
