@@ -17,6 +17,9 @@ import { useAppKitAccount,
          useAppKitProvider
        } from '@reown/appkit-ethers-react-native';
 
+//Import Javascript Component
+import { clearWalletProvider, setWalletProvider } from '../../components/comp/GlobalStore';
+
 //Setup contract ABI and address
 const contract = require("../../artifacts/contracts/JustCall.sol/JustCall.json");
 const abi = contract.abi;
@@ -41,8 +44,11 @@ const Login = () => {
   //Redirect user to main page if session exist
   useEffect(() => {
     if (session) {
+      setWalletProvider(walletProvider);
       console.log('Login successful. Redirecting to main page.');
       router.replace('keypad');
+    } else {
+      clearWalletProvider();
     };
   }, [session]);
 

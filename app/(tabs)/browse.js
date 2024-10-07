@@ -21,15 +21,17 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Fontisto from '@expo/vector-icons/Fontisto';
 
 //Import APIs and router
-import { ethers, BrowserProvider } from 'ethers';
-import '@walletconnect/react-native-compat';
 import { useAppKitProvider } from '@reown/appkit-ethers-react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+//Import Javascript components
+import CleanPhoneNumber from '../../components/comp/CleanPhoneNumber';
+import CallerID from '../../components/comp/CallerID';
+
 //Setup contract ABI and address
-const contract = require("../../artifacts/contracts/JustCall.sol/JustCall.json");
-const abi = contract.abi;
-const contractAddress = process.env.EXPO_PUBLIC_CONTRACT_ADDR;
+// const contract = require("../../artifacts/contracts/JustCall.sol/JustCall.json");
+// const abi = contract.abi;
+// const contractAddress = process.env.EXPO_PUBLIC_CONTRACT_ADDR;
 
 const Browse = () => {
   //Get wallet connection status and provider
@@ -88,23 +90,6 @@ const Browse = () => {
     requestPermission();
   }, []);
 
-  //Function to clean phone number format
-  const cleanPhoneNumber = (phoneNumber) => {
-    // Step 1: Remove any non-numeric characters (except for '+')
-    let cleanedNumber = phoneNumber.replace(/[^0-9+]/g, '');
-  
-    // Step 2: Ensure the number starts with +601 (for Malaysian numbers)
-    if (cleanedNumber.startsWith('0')) {
-      // Replace '0' at the beginning with '0'
-      cleanedNumber = cleanedNumber.replace(/^0/, '+60');
-    } else if (cleanedNumber.startsWith('60')) {
-      // Replace '60' at the beginning with '+60'
-      cleanedNumber = cleanedNumber.replace(/^60/, '+60');
-    };
-  
-    return cleanedNumber;
-  };
-
   const fetchAndCleanContacts = async () => {
     try {
       const contacts = await Contacts.getAll();
@@ -114,7 +99,7 @@ const Browse = () => {
         if (contact.phoneNumbers && contact.phoneNumbers.length > 0) {
           contact.phoneNumbers = contact.phoneNumbers.map((phoneNumber) => ({
             ...phoneNumber,
-            number: cleanPhoneNumber(phoneNumber.number),
+            number: CleanPhoneNumber(phoneNumber.number),
           }));
         };
         return contact;
@@ -159,17 +144,13 @@ const Browse = () => {
 
     try {
       // Clean the phone number before calling the contract
-      const cleanedPhoneNumber = await cleanPhoneNumber(search);
+      const cleanedPhoneNumber = await CleanPhoneNumber(search);
 
       // Update state with the cleaned phone number (optional)
       setSearch(cleanedPhoneNumber);
 
-      const provider = new BrowserProvider(walletProvider);
-      const signer = await provider.getSigner();
-      const justCall = new ethers.Contract(contractAddress, abi, signer);
-
-      const profile = await justCall.getUserByPhoneNumber(cleanedPhoneNumber);
-      console.log("User: ", profile);
+      const profile = await CallerID(cleanedPhoneNumber, walletProvider);
+      
       setName(profile[0]);
       setNum(profile[1]);
       setShowModal(true);

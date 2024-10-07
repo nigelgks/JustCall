@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
+import NetInfo from '@react-native-community/netinfo';
 import AuthProvider from '../providers/AuthProvider';
 import ConnectionModal from '../components/modal/ConnectionModal';
-import NetInfo from '@react-native-community/netinfo';
 
 const RootLayout = () => {
   const [isOffline, setIsOffline] = useState(false);
