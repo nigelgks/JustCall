@@ -178,7 +178,7 @@ const identification = () => {
 
       router.navigate({
         pathname: 'register',
-        params: {name: 'JOHN DOE'}
+        params: {name: 'JANE DOE'}
       });
     } catch (error) {
       console.error('Error:', error);

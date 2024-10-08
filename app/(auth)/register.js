@@ -155,7 +155,7 @@ const Register = () => {
 
     try {
       //Fetch phone number from blockchain
-      const profilePhone = await justCall.getUserByPhoneNumber("+60198781785");
+      const profilePhone = await justCall.getUserByPhoneNumber(phone);
       console.log("User: ", profilePhone);
 
       //Second stage check database
