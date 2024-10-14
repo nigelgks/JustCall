@@ -18,9 +18,6 @@ import { ethers, BrowserProvider } from 'ethers';
 import '@walletconnect/react-native-compat';
 import { useAppKitAccount, useAppKitProvider } from '@reown/appkit-ethers-react-native';
 
-//Import Javascript Component
-import { setWalletSigner } from '../../components/comp/GlobalStore';
-
 //Setup contract ABI and address
 const contract = require("../../artifacts/contracts/JustCall.sol/JustCall.json");
 const abi = contract.abi;

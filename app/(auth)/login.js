@@ -18,7 +18,7 @@ import { useAppKitAccount,
        } from '@reown/appkit-ethers-react-native';
 
 //Import Javascript Component
-import { clearWalletSigner, setWalletSigner } from '../../components/comp/GlobalStore';
+import { clearWalletSigner } from '../../components/comp/GlobalStore';
 
 //Setup contract ABI and address
 const contract = require("../../artifacts/contracts/JustCall.sol/JustCall.json");
