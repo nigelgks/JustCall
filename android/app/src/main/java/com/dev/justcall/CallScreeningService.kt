@@ -7,7 +7,8 @@ import android.telecom.Call
 import android.telecom.CallScreeningService
 import android.util.Log
 import androidx.annotation.RequiresApi
-import com.facebook.react.ReactApplication
+import androidx.core.content.ContextCompat
+import com.facebook.react.HeadlessJsTaskService
 
 // NOTE: JUSTCALL MUST BE THE DEFAULT CALLER ID AND SPAM APP FOR API 29+
 // (MainActivity.kt, Line 37)
@@ -15,25 +16,23 @@ import com.facebook.react.ReactApplication
 @RequiresApi(Build.VERSION_CODES.N)
 class CallScreeningService: CallScreeningService() {
     @SuppressLint("VisibleForTests")
-    @RequiresApi(Build.VERSION_CODES.Q)
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onScreenCall(callDetails: Call.Details) {
         Log.d("Call_Receiver", "[SERVICE] Fetching caller number")
         val incomingNum = callDetails.handle.schemeSpecificPart
         Log.d("Call_Receiver", "[SERVICE] Incoming call from: $incomingNum")
 
-        val intent = Intent(this, CallForegroundService::class.java)
-        startService(intent)
-        Log.d("Call_Receiver", "[FOREGROUND] Service called")
+        val intentForeground = Intent(this, CallForegroundService::class.java)
+        //intentForeground.putExtra("incomingNumber", incomingNum)
+        startService(intentForeground)
+        Log.d("Call_Receiver", "[SERVICE] Foreground called")
 
-        val reactApplication = application as ReactApplication
-        val reactContext = reactApplication.reactNativeHost.reactInstanceManager.currentReactContext
+        val intent = Intent(this, CallHeadlessService::class.java)
+        intent.putExtra("incomingNumber", incomingNum)
+        this.startService(intent)
 
-        if (reactContext != null) {
-            Log.d("Call_Receiver", "[SERVICE] Calling module function")
-            val callNativeModule = reactContext.getNativeModule(CallNativeModule::class.java)
-            callNativeModule?.sendIncomingCall(incomingNum)
-            Log.d("Call_Receiver", "[SERVICE] Module function called")
-        }
+        HeadlessJsTaskService.acquireWakeLockNow(this)
+        Log.d("Call_Receiver", "[SERVICE] Headless task waking up")
 
         val response = CallResponse.Builder()
             .setDisallowCall(false)

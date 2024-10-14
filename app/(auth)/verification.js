@@ -19,7 +19,7 @@ import '@walletconnect/react-native-compat';
 import { useAppKitAccount, useAppKitProvider } from '@reown/appkit-ethers-react-native';
 
 //Import Javascript Component
-import { setWalletProvider } from '../../components/comp/GlobalStore';
+import { setWalletSigner } from '../../components/comp/GlobalStore';
 
 //Setup contract ABI and address
 const contract = require("../../artifacts/contracts/JustCall.sol/JustCall.json");
@@ -59,7 +59,6 @@ const Verification = () => {
                 //Verify whether user confirmed before login
                 if (signInDate > confirmedDate) {
                     console.log(confirmedDate);
-                    setWalletProvider(walletProvider);
                     console.log('Logged in succesfully.');
 
                     //Navigate to main page

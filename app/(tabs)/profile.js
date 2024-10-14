@@ -22,7 +22,7 @@ import { AntDesign, Fontisto } from '@expo/vector-icons';
 import Octicons from '@expo/vector-icons/Octicons';
 
 //Import Javascript Component
-import { clearWalletProvider } from '../../components/comp/GlobalStore';
+import { clearWalletSigner } from '../../components/comp/GlobalStore';
 
 const Profile = () => {
   //Retrieve connected wallet address
@@ -155,7 +155,7 @@ const Profile = () => {
       setLoading(false);
       console.log("Signed out successfully.");
       alert("Signed out successfully.");
-      clearWalletProvider();
+      clearWalletSigner();
       router.replace('wallet');
     } catch (error) {
         console.log("Unable to sign out: ", error);

@@ -7,8 +7,8 @@ const contract = require("../../artifacts/contracts/JustCall.sol/JustCall.json")
 const abi = contract.abi;
 const contractAddress = process.env.EXPO_PUBLIC_CONTRACT_ADDR;
 
-const CallerID = async (phoneNumber, walletProvider) => {
-    const provider = new BrowserProvider(walletProvider);
+const CallerID = async (phoneNumber, walletSigner) => {
+    const provider = new BrowserProvider(walletSigner);
     const signer = await provider.getSigner();
     const justCall = new ethers.Contract(contractAddress, abi, signer);
 

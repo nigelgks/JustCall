@@ -21,6 +21,7 @@
   <uses-permission android:name="android.permission.CALL_SCREENING"/>
   <uses-permission android:name="android.permission.CAMERA"/>
   <uses-permission android:name="android.permission.WAKE_LOCK"/>
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
   <queries>
     <intent>
       <action android:name="android.intent.action.VIEW"/>
@@ -42,7 +43,10 @@
     <service android:name=".CallForegroundService"
         android:foregroundServiceType="phoneCall"
     />
-    <service android:name=".CallHeadlessService"/>
+    <service android:name=".CallHeadlessService"
+        android:permission="android.permission.BIND_JOB_SERVICE"
+    />
+    <receiver android:name=".CallReceiver"/>
     <activity android:name=".MainActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|uiMode" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:theme="@style/Theme.App.SplashScreen" android:exported="true" android:screenOrientation="fullSensor"
         tools:ignore="DiscouragedApi">
       <intent-filter>

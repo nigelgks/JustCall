@@ -6,7 +6,6 @@ import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.view.WindowManager
-import com.facebook.react.HeadlessJsTaskService
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
@@ -23,17 +22,6 @@ class CallNativeModule(reactContext: ReactApplicationContext) : ReactContextBase
         return MODULE_NAME
     }
 
-    fun sendIncomingCall(incomingNum: String){
-        Log.d("Call_Receiver", "[MODULE] Number received")
-
-        val intent = Intent(reactApplicationContext, CallHeadlessService::class.java)
-        intent.putExtra("incomingNumber", incomingNum)
-        reactApplicationContext.startService(intent)
-
-        HeadlessJsTaskService.acquireWakeLockNow(reactApplicationContext)
-        Log.d("Call_Receiver", "[MODULE] Headless task waking up")
-    }
-
     @ReactMethod
     fun receiveCallerID(name: String, phoneNum: String) {
         Log.d("Call_Receiver", "[MODULE] Caller ID received")
@@ -43,8 +31,8 @@ class CallNativeModule(reactContext: ReactApplicationContext) : ReactContextBase
             Log.d("Call_Receiver", "[MODULE] Checking overlay permission: ${Settings.canDrawOverlays(reactApplicationContext)}")
 
             val builder = AlertDialog.Builder(reactApplicationContext)
-            builder.setTitle("Incoming call")
-            builder.setMessage("$name ($phoneNum) is calling...")
+            builder.setTitle("JustCall Caller ID active")
+            builder.setMessage("$name ($phoneNum)")
             builder.setPositiveButton("Okay") { dialog, _ -> dialog.dismiss() }
             builder.setCancelable(false)
             val dialog = builder.create()
