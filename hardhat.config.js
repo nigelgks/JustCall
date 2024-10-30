@@ -1,6 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("@nomicfoundation/hardhat-ignition-ethers");
 require('dotenv').config();
+require("hardhat-slither");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {

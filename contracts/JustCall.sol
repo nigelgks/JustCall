@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 // Author: @nigelgks
 contract JustCall {
-    address public owner;
+    address public immutable owner;
     
     struct Profile {
         address addr;
@@ -26,53 +26,53 @@ contract JustCall {
     }
 
     //Validate new user
-    modifier onlyNewUser(string calldata _phoneNumber) {
+    modifier onlyNewUser(string calldata phoneNumber) {
         require(profile[msg.sender].addr == address(0), "User already registered.");
-        require(bytes(users[_phoneNumber]).length == 0, "Phone number already registered");
+        require(bytes(users[phoneNumber]).length == 0, "Phone number already registered");
         _;
     }
 
     //Validate phone number format
-    modifier validatePhoneNum(string calldata _phoneNumber) {
-        require(bytes(_phoneNumber).length >= 12 && bytes(_phoneNumber).length <= 13, "Invalid phone number length.");
+    modifier validatePhoneNum(string calldata phoneNumber) {
+        require(bytes(phoneNumber).length >= 12 && bytes(phoneNumber).length <= 13, "Invalid phone number length.");
         _;
     }
 
     //Validate phone number exist
-    modifier validateNumberLookup(string calldata _phoneNumber) {
-        require(bytes(users[_phoneNumber]).length != 0, "Phone number is not registered.");
+    modifier validateNumberLookup(string calldata phoneNumber) {
+        require(bytes(users[phoneNumber]).length != 0, "Phone number is not registered.");
         _;
     }
 
     //Validate address exist
-    modifier validateAddressLookup(address _addr) {
-        require(profile[_addr].addr != address(0), "User does not exist.");
+    modifier validateAddressLookup(address addr) {
+        require(profile[addr].addr != address(0), "User does not exist.");
         _;
     }
 
     //Registration for new user
     function register(
-        string calldata _fullName,
-        string calldata _phoneNumber
-    ) external onlyNewUser(_phoneNumber) validatePhoneNum(_phoneNumber) {
+        string calldata fullName,
+        string calldata phoneNumber
+    ) external onlyNewUser(phoneNumber) validatePhoneNum(phoneNumber) {
         profile[msg.sender] = Profile({
             addr: msg.sender,
-            fullName: _fullName,
-            phoneNumber: _phoneNumber
+            fullName: fullName,
+            phoneNumber: phoneNumber
         });
 
-        users[_phoneNumber] = _fullName;
+        users[phoneNumber] = fullName;
     }
 
     //Get full name from phone number lookup
     function getUserByPhoneNumber(
-        string calldata _phoneNumber
-    ) external validatePhoneNum(_phoneNumber) validateNumberLookup(_phoneNumber) view returns(
+        string calldata phoneNumber
+    ) external validatePhoneNum(phoneNumber) validateNumberLookup(phoneNumber) view returns(
         string memory,
-        string memory phoneNumber
+        string memory
     ) {
-        string memory fullName = users[_phoneNumber];
-        return (fullName, _phoneNumber);
+        string memory fullName = users[phoneNumber];
+        return (fullName, phoneNumber);
     }
 
     //Get profile details from user address
@@ -86,9 +86,9 @@ contract JustCall {
     }
 
     //Remove profile when requested (owner only)
-    function removeUser(address _addr) external onlyOwner validateAddressLookup(_addr) {
-        Profile storage user = profile[_addr];
+    function removeUser(address addr) external onlyOwner validateAddressLookup(addr) {
+        Profile storage user = profile[addr];
         delete users[user.phoneNumber];
-        delete profile[_addr];
+        delete profile[addr];
     }
 }
