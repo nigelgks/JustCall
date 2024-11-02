@@ -1,4 +1,4 @@
-// const {ethers} = require('ethers');
+//const {ethers} = require('ethers');
 // const contract = require("../artifacts/contracts/JustCall.sol/JustCall.json");
 // const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
 // const abi = contract.abi;
@@ -10,7 +10,7 @@ async function main() {
     //Fetch signers and assign
     const [owner, addr1, addr2] = await ethers.getSigners();
     const user = owner;
-    const removeUser = addr2;
+    const removeUser = addr1;
 
     //Establish contract
     const JustCall = await ethers.getContractFactory("JustCall");
@@ -25,12 +25,16 @@ async function main() {
 
 
     //Call owner address
-    //console.log(await justCall.owner());
+    console.log(await justCall.owner());
 
 
     //Register new user
     // try {
+    //     const startTime = Date.now();
     //     await justCall.register("JOHN DOE", "+60198781785");
+    //     const endTime = Date.now();
+    //     const duration = endTime - startTime;
+    //     console.log(`Duration: ${duration}`);
     // } catch(error) {
     //     //Throw revereted error if user already exist
     //     if (error.message.includes('User already registered.')) {
@@ -46,33 +50,33 @@ async function main() {
 
 
     //Remove user (owner only)
-    // try {
-    //     await justCall.removeUser(removeUser.address);
-    //     console.log('Removal completed.')
-    // } catch(error) {
-    //     if (error.message.includes('Only the contract administrator can call this function.')) {
-    //         console.log("Only the contract administrator can call this function.");
-    //     } else if (error.message.includes('User does not exist.')) {
-    //         console.log("User does not exist.");
-    //     } else {
-    //         console.log('Error:', error);
-    //     };
-    // };
-
-
-    //Get user's name given phone number
     try {
-        const profilePhone = await justCall.getUserByPhoneNumber("+60133037045");
-        console.log("user: ", profilePhone);
-    } catch (error) {
-        if (error.message.includes('Invalid phone number length.')) {
-            console.log("Invalid phone number length.");
-        } else if (error.message.includes('Phone number is not registered')) {
-            console.log("Phone number is not registered.");
+        await justCall.removeUser(removeUser.address);
+        console.log('Removal completed.')
+    } catch(error) {
+        if (error.message.includes('Only the contract administrator can call this function.')) {
+            console.log("Only the contract administrator can call this function.");
+        } else if (error.message.includes('User does not exist.')) {
+            console.log("User does not exist.");
         } else {
             console.log('Error:', error);
         };
     };
+
+
+    //Get user's name given phone number
+    // try {
+    //     const profilePhone = await justCall.getUserByPhoneNumber("+60133037045");
+    //     console.log("user: ", profilePhone);
+    // } catch (error) {
+    //     if (error.message.includes('Invalid phone number length.')) {
+    //         console.log("Invalid phone number length.");
+    //     } else if (error.message.includes('Phone number is not registered')) {
+    //         console.log("Phone number is not registered.");
+    //     } else {
+    //         console.log('Error:', error);
+    //     };
+    // };
 
 
     //Get user's profile given address

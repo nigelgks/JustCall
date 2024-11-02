@@ -7,7 +7,6 @@ import android.telecom.Call
 import android.telecom.CallScreeningService
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat
 import com.facebook.react.HeadlessJsTaskService
 
 // NOTE: JUSTCALL MUST BE THE DEFAULT CALLER ID AND SPAM APP FOR API 29+
