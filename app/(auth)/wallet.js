@@ -1,25 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 //Import APIs and router
 import { useRouter } from 'expo-router';
-import { ethers, BrowserProvider } from 'ethers';
 import '@walletconnect/react-native-compat';
 import { createAppKit,
          defaultConfig,
          AppKit,
          AppKitButton,
-         useAppKitAccount,
-         useAppKitProvider
+         useAppKitAccount
         } from '@reown/appkit-ethers-react-native';
 
 //Assign WalletConnect project ID from .env
 const projectId = process.env.EXPO_PUBLIC_REOWN_PROJECT_ID;
-
-//Setup contract ABI and address
-const contract = require("../../artifacts/contracts/JustCall.sol/JustCall.json");
-const abi = contract.abi;
-const contractAddress = process.env.EXPO_PUBLIC_CONTRACT_ADDR;
 
 //WalletConnect metadata
 const metadata = {
@@ -66,30 +59,13 @@ createAppKit({
 const wallet = () => {
   //Get wallet connection status and provider
   const { isConnected } = useAppKitAccount();
-  const { walletProvider } = useAppKitProvider();
-
-  //useState hooks
-  const [ownerAddr, setOwnerAddr] = useState('');
 
   //Expo router navigation
   const router = useRouter();
 
   //Function to proceed with login if wallet connected
   const handleContinue = () => {
-    getOwner();
     router.navigate('login');
-  };
-
-  const getOwner = async () => {
-    try {
-      const provider = new BrowserProvider(walletProvider);
-      const signer = await provider.getSigner();
-      const justCall = new ethers.Contract(contractAddress, abi, signer);
-
-      console.log('Owner address:', await justCall.owner());
-    } catch (error) {
-      console.log('Error:', error);
-    };
   };
   
   return (

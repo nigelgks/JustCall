@@ -32,7 +32,7 @@ const Verification = () => {
     const router = useRouter();
 
     //Passed variables from previous page
-    const { signIn, name, phoneNum, email, password } = useLocalSearchParams();
+    const { signIn, name, phoneNum, email, password, append } = useLocalSearchParams();
 
     //useState hooks
     const [code, setCode] = useState(new Array(6).fill(''));
@@ -166,7 +166,29 @@ const Verification = () => {
             if (signIn != 'true') {
                 await addAccount(data, address);
             } else {
-                setSession(data.session);
+                if (append == 'true') {
+                    const addData = {
+                        id: data.session.user.id,
+                        name,
+                        address,
+                        phone: phoneNum
+                    };
+                    
+                    const {error} = await supabase
+                        .from('accounts')
+                        .insert([addData])
+                        .select();
+                    
+                    if (error) {
+                        console.log('Unable to update user table:', error);
+                        alert('Error encountered. Please try again.');
+                    } else {
+                        console.log('User table updated.');
+                        setSession(data.session);
+                    };
+                } else {
+                    setSession(data.session);
+                };
             };
         };
 

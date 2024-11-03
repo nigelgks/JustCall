@@ -311,7 +311,7 @@ const Profile = () => {
           <View style={[styles.verifyBox, {
             backgroundColor: (!emailConfirmed) ? 'darkcyan' : 'orange'
           }]}>
-            {(!emailConfirmed) ? (
+            {(!emailConfirmed || !email) ? (
               <>
                 <Octicons name="verified" size={24} color="white" />
                 <Text style={[styles.verifyText, {color: 'white'}]}>Account verified.</Text>

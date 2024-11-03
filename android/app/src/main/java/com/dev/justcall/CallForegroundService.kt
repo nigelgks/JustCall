@@ -50,8 +50,8 @@ class CallForegroundService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(callReceiver)
-        Log.d("Call_Receiver", "[FOREGROUND] Receiver unregistered")
+        //unregisterReceiver(callReceiver)
+        //Log.d("Call_Receiver", "[FOREGROUND] Receiver unregistered")
     }
 
     override fun onBind(intent: Intent?): IBinder? {

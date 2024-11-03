@@ -9,7 +9,7 @@ const contractAddress = "0xc2645B106e470DE08441a9Ec600C293de618333d";
 async function main() {
     //Fetch signers and assign
     const [owner, addr1, addr2] = await ethers.getSigners();
-    const user = owner;
+    const user = addr1;
     const removeUser = addr1;
 
     //Establish contract
@@ -50,18 +50,18 @@ async function main() {
 
 
     //Remove user (owner only)
-    try {
-        await justCall.removeUser(removeUser.address);
-        console.log('Removal completed.')
-    } catch(error) {
-        if (error.message.includes('Only the contract administrator can call this function.')) {
-            console.log("Only the contract administrator can call this function.");
-        } else if (error.message.includes('User does not exist.')) {
-            console.log("User does not exist.");
-        } else {
-            console.log('Error:', error);
-        };
-    };
+    // try {
+    //     await justCall.removeUser(removeUser.address);
+    //     console.log('Removal completed.')
+    // } catch(error) {
+    //     if (error.message.includes('Only the contract administrator can call this function.')) {
+    //         console.log("Only the contract administrator can call this function.");
+    //     } else if (error.message.includes('User does not exist.')) {
+    //         console.log("User does not exist.");
+    //     } else {
+    //         console.log('Error:', error);
+    //     };
+    // };
 
 
     //Get user's name given phone number
@@ -80,16 +80,16 @@ async function main() {
 
 
     //Get user's profile given address
-    // try {
-    //     const profileAddr = await justCall.getUserByAddress();
-    //     console.log("profile: ", profileAddr);
-    // } catch (error) {
-    //     if (error.message.includes('User does not exist.')) {
-    //         console.log("User does not exist.");
-    //     } else {
-    //         console.log('Error:', error);
-    //     };
-    // };
+    try {
+        const profileAddr = await justCall.getUserByAddress();
+        console.log("profile: ", profileAddr);
+    } catch (error) {
+        if (error.message.includes('User does not exist.')) {
+            console.log("User does not exist.");
+        } else {
+            console.log('Error:', error);
+        };
+    };
 
 
 
