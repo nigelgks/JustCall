@@ -12,8 +12,8 @@ class CallReceiver: BroadcastReceiver() {
 
         if (TelephonyManager.EXTRA_STATE_IDLE == state) {
             Log.d("Call_Receiver", "[RECEIVER] Call ended or rejected")
-//            val stopIntent = Intent(context, CallForegroundService::class.java)
-//            context.stopService(stopIntent)
+            val stopIntent = Intent(context, CallForegroundService::class.java)
+            context.stopService(stopIntent)
         }
     }
 }

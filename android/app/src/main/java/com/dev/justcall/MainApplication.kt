@@ -25,7 +25,6 @@ class MainApplication : Application(), ReactApplication {
             // Packages that cannot be auto linked yet can be added manually here, for example:
             // packages.add(new MyReactNativePackage());
             val packages = PackageList(this).packages
-            packages.add(CallPackage())
             return packages
           }
 
