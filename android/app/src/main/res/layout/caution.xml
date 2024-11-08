@@ -1,0 +1,106 @@
+<!-- res/layout/caution.xml -->
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:gravity="fill"
+    android:orientation="vertical"
+    android:layout_marginHorizontal="10dp"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="16dp" >
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/image_caution"
+        android:contentDescription="@string/overlay_background_desc" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginVertical="10dp" >
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:contentDescription="@string/icon_desc"
+            android:background="@drawable/icon_logo_white" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/caller_id_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/oval_orange"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:text="@string/caller_id_active"
+            android:textColor="@android:color/holo_red_light"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/close_caution_button"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/icon_dismiss_white"
+            android:contentDescription="@string/dismiss_icon_desc"
+            android:focusable="true"
+            android:clickable="true"
+            android:layout_marginBottom="1dp"
+            android:layout_marginRight="1dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:paddingTop="20dp" >
+
+        <TextView
+            android:id="@+id/caller_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/caller_number"
+            android:textColor="@android:color/black"
+            android:textSize="23sp"
+            android:textStyle="bold"
+            android:paddingBottom="10sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/caution_title"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:paddingBottom="2sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/caution_warning"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:paddingHorizontal="10dp" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

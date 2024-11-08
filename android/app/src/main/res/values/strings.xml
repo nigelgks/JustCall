@@ -3,5 +3,14 @@
   <string name="expo_splash_screen_resize_mode" translatable="false">contain</string>
   <string name="expo_splash_screen_status_bar_translucent" translatable="false">false</string>
   <string name="expo_system_ui_user_interface_style" translatable="false">automatic</string>
-    <string name="incoming_call">Incoming call</string>
+  <string name="incoming_call">Incoming call</string>
+  <string name="caller_name">Caller Name</string>
+  <string name="caller_number">Caller Number</string>
+  <string name="icon_desc">JustCall app icon</string>
+  <string name="caller_id_active">Caller ID Active</string>
+  <string name="dismiss_button">x</string>
+  <string name="overlay_background_desc">Overlay background</string>
+  <string name="dismiss_icon_desc">dismiss icon desc</string>
+    <string name="caution_title">Unknown Caller</string>
+  <string name="caution_warning">Beware of scammer</string>
 </resources>

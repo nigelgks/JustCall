@@ -13,7 +13,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 //Import wallet provider
 import { useAppKitProvider } from '@reown/appkit-ethers-react-native';
-import { setWalletSigner } from '../../components/comp/GlobalStore';
 
 const keypad = () => {
   //useState hooks
@@ -21,13 +20,6 @@ const keypad = () => {
 
   //Get wallet provider
   const { walletProvider } = useAppKitProvider();
-
-  useEffect(() => {
-    if (walletProvider) {
-      console.log('Provider exist');
-      setWalletSigner(walletProvider);
-    };
-  }, [walletProvider]);
 
   //Request call permission at first render
   useEffect(() => {

@@ -2,7 +2,6 @@ import React from "react";
 import { Redirect } from "expo-router";
 import { useAuth } from "../providers/AuthProvider";
 import { ActivityIndicator, NativeModules } from "react-native";
-import '../components/comp/Headless';
 
 const { CallNativeModule } = NativeModules;
 

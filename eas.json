@@ -1,33 +1,67 @@
 {
   "cli": {
-    "version": ">= 12.0.0",
+    "version": ">= 12.6.2",
     "appVersionSource": "remote"
   },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "env": {
-        "SUPABASE_URL": "https://vjjffydbwvxufgkskepq.supabase.co",
-        "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqamZmeWRid3Z4dWZna3NrZXBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ3MjUyNDgsImV4cCI6MjA0MDMwMTI0OH0.ueA-Simrx4gYeD65rRptGfPMH58mQF0kSfcQuHN2E_A",
-        "WALLETCONNECT_PROJECT_ID": "ddc0ae841084e2e308c788df1e9cd794"
-      }
-    },
-    "preview": {
-      "developmentClient": true,
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease"
       },
-      "distribution": "internal",
       "env": {
-        "SUPABASE_URL": "https://vjjffydbwvxufgkskepq.supabase.co",
-        "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqamZmeWRid3Z4dWZna3NrZXBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ3MjUyNDgsImV4cCI6MjA0MDMwMTI0OH0.ueA-Simrx4gYeD65rRptGfPMH58mQF0kSfcQuHN2E_A",
-        "WALLETCONNECT_PROJECT_ID": "ddc0ae841084e2e308c788df1e9cd794"
+        "NODE_ENV": "development",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://vjjffydbwvxufgkskepq.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqamZmeWRid3Z4dWZna3NrZXBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ3MjUyNDgsImV4cCI6MjA0MDMwMTI0OH0.ueA-Simrx4gYeD65rRptGfPMH58mQF0kSfcQuHN2E_A",
+        "EXPO_PUBLIC_REOWN_PROJECT_ID": "ddc0ae841084e2e308c788df1e9cd794",
+        "EXPO_PUBLIC_INFURA_PROJECT_ID": "6ec31da19e8b4d44a456b8ed4b8a6846",
+        "EXPO_PUBLIC_ETHERSCAN_API": "H8A3BP1PBSJG4N34IT9EZ38H3WR91CCJMM",
+        "EXPO_PUBLIC_ANYFORM_KYC": "https://anyform.sightour.com/api/form/ID_SEA_MY-cp2ny4e9",
+        "EXPO_PUBLIC_CONTRACT_ADDR": "0xc2645B106e470DE08441a9Ec600C293de618333d",
+        "EXPO_PUBLIC_PRIVATE_KEY_ACCOUNT_1": "5fba9e7f67b98be73dfa89bacd9226fcbe54326305324203ee7fd48f6f2403f6",
+        "EXPO_PUBLIC_PRIVATE_KEY_ACCOUNT_2": "a7591454e6aa3d37f60e7a2742d6480af1ce0654a257e48f54ca4c2877641603",
+        "EXPO_PUBLIC_PRIVATE_KEY_ACCOUNT_3": "9a4d215bd3500fc0ed26069a1507e852f267ed5916f36c20a7a061bab85d945e"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease"
+      },
+      "env": {
+        "NODE_ENV": "preview",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://vjjffydbwvxufgkskepq.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqamZmeWRid3Z4dWZna3NrZXBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ3MjUyNDgsImV4cCI6MjA0MDMwMTI0OH0.ueA-Simrx4gYeD65rRptGfPMH58mQF0kSfcQuHN2E_A",
+        "EXPO_PUBLIC_REOWN_PROJECT_ID": "ddc0ae841084e2e308c788df1e9cd794",
+        "EXPO_PUBLIC_INFURA_PROJECT_ID": "6ec31da19e8b4d44a456b8ed4b8a6846",
+        "EXPO_PUBLIC_ETHERSCAN_API": "H8A3BP1PBSJG4N34IT9EZ38H3WR91CCJMM",
+        "EXPO_PUBLIC_ANYFORM_KYC": "https://anyform.sightour.com/api/form/ID_SEA_MY-cp2ny4e9",
+        "EXPO_PUBLIC_CONTRACT_ADDR": "0xc2645B106e470DE08441a9Ec600C293de618333d",
+        "EXPO_PUBLIC_PRIVATE_KEY_ACCOUNT_1": "5fba9e7f67b98be73dfa89bacd9226fcbe54326305324203ee7fd48f6f2403f6",
+        "EXPO_PUBLIC_PRIVATE_KEY_ACCOUNT_2": "a7591454e6aa3d37f60e7a2742d6480af1ce0654a257e48f54ca4c2877641603",
+        "EXPO_PUBLIC_PRIVATE_KEY_ACCOUNT_3": "9a4d215bd3500fc0ed26069a1507e852f267ed5916f36c20a7a061bab85d945e"
       }
     },
     "production": {
-      "autoIncrement": true
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "NODE_ENV": "preview",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://vjjffydbwvxufgkskepq.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqamZmeWRid3Z4dWZna3NrZXBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ3MjUyNDgsImV4cCI6MjA0MDMwMTI0OH0.ueA-Simrx4gYeD65rRptGfPMH58mQF0kSfcQuHN2E_A",
+        "EXPO_PUBLIC_REOWN_PROJECT_ID": "ddc0ae841084e2e308c788df1e9cd794",
+        "EXPO_PUBLIC_INFURA_PROJECT_ID": "6ec31da19e8b4d44a456b8ed4b8a6846",
+        "EXPO_PUBLIC_ETHERSCAN_API": "H8A3BP1PBSJG4N34IT9EZ38H3WR91CCJMM",
+        "EXPO_PUBLIC_ANYFORM_KYC": "https://anyform.sightour.com/api/form/ID_SEA_MY-cp2ny4e9",
+        "EXPO_PUBLIC_CONTRACT_ADDR": "0xc2645B106e470DE08441a9Ec600C293de618333d",
+        "EXPO_PUBLIC_PRIVATE_KEY_ACCOUNT_1": "5fba9e7f67b98be73dfa89bacd9226fcbe54326305324203ee7fd48f6f2403f6",
+        "EXPO_PUBLIC_PRIVATE_KEY_ACCOUNT_2": "a7591454e6aa3d37f60e7a2742d6480af1ce0654a257e48f54ca4c2877641603",
+        "EXPO_PUBLIC_PRIVATE_KEY_ACCOUNT_3": "9a4d215bd3500fc0ed26069a1507e852f267ed5916f36c20a7a061bab85d945e"
+      }
     }
   },
   "submit": {

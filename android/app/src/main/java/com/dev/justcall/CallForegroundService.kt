@@ -1,6 +1,6 @@
 package com.dev.justcall
 
-import android.app.AlertDialog
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -8,12 +8,18 @@ import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.Log
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
 import android.view.WindowManager
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.app.NotificationCompat
 
 import org.web3j.protocol.Web3j
@@ -32,15 +38,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 // Configure Web3j connection to Sepolia
-val web3j: Web3j = Web3j.build(HttpService("https://sepolia.infura.io/v3/${BuildConfig.EXPO_PUBLIC_INFURA_PROJECT_ID}"))
+val web3j: Web3j = Web3j.build(HttpService("https://sepolia.infura.io/v3/6ec31da19e8b4d44a456b8ed4b8a6846"))
 
 // Replace with your wallet's private key and Sepolia smart contract address
-val credentials: Credentials = Credentials.create(BuildConfig.EXPO_PUBLIC_PRIVATE_KEY_ACCOUNT_1)
-const val contractAddress = BuildConfig.EXPO_PUBLIC_CONTRACT_ADDR
+val credentials: Credentials = Credentials.create("5fba9e7f67b98be73dfa89bacd9226fcbe54326305324203ee7fd48f6f2403f6")
+const val contractAddress = "0xc2645B106e470DE08441a9Ec600C293de618333d"
 
 class CallForegroundService : Service() {
     private val channelID = "CallServiceChannel"
     private lateinit var callReceiver: BroadcastReceiver
+    private var overlayView: View? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d("Call_Receiver", "[FOREGROUND - onStart] Setting up")
@@ -126,7 +133,9 @@ class CallForegroundService : Service() {
                     if (result.size >= 2) {
                         val name = result[0].value as String
                         val phone = result[1].value as String
-                        showOverlay(name, phone)
+                        showVerifiedOverlay(name, phone)
+                    } else {
+                        showCautionOverlay(cleanedPhoneNumber)
                     }
                 }
 
@@ -139,29 +148,83 @@ class CallForegroundService : Service() {
         Log.d("Call_Receiver", "[FOREGROUND - getUser] Fetching completed")
     }
 
-    private fun showOverlay(name: String, phoneNum: String) {
+    @SuppressLint("InflateParams")
+    private fun showVerifiedOverlay(name: String, phoneNum: String) {
         Log.d("Call_Receiver", "[FOREGROUND - receiveCaller] Caller ID received")
         Log.d("Call_Receiver", "[FOREGROUND - receiveCaller] $name ($phoneNum) is calling...")
 
         if (Settings.canDrawOverlays(this)) {
             Log.d("Call_Receiver", "[MODULE] Checking overlay permission: ${Settings.canDrawOverlays(this)}")
 
-            val builder = AlertDialog.Builder(this)
-            builder.setTitle("JustCall Caller ID active")
-            builder.setMessage("$name ($phoneNum)")
-            builder.setPositiveButton("Okay") { dialog, _ -> dialog.dismiss() }
-            builder.setCancelable(false)
-            val dialog = builder.create()
+            // Inflate the custom overlay layout
+            val inflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            overlayView = inflater.inflate(R.layout.overlay, null).apply {
+                findViewById<TextView>(R.id.caller_name).text = name
+                findViewById<TextView>(R.id.caller_number).text = phoneNum
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                dialog.window?.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY)
-            } else {
-                dialog.window?.setType(WindowManager.LayoutParams.TYPE_PHONE)
+                // Find and set an OnClickListener on the close button
+                findViewById<ImageView>(R.id.close_verified_button).setOnClickListener {
+                    removeOverlay()
+                }
             }
 
-            dialog.show()
+            // Set layout parameters for the overlay
+            val layoutParams = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                } else {
+                    WindowManager.LayoutParams.TYPE_PHONE
+                },
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.TRANSLUCENT
+            )
+
+            layoutParams.gravity = Gravity.CENTER
+
+            // Add the overlay to the window
+            val windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+            windowManager.addView(overlayView, layoutParams)
+
         } else {
             Log.d("Call_Receiver", "[FOREGROUND] Overlay permission not granted. Requesting permission...")
+            requestOverlayPermission()
+        }
+    }
+
+    @SuppressLint("InflateParams")
+    private fun showCautionOverlay(cleanedPhoneNumber: String) {
+        if (Settings.canDrawOverlays(this)) {
+            val inflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            overlayView = inflater.inflate(R.layout.caution, null).apply {
+                findViewById<TextView>(R.id.caller_number).text = cleanedPhoneNumber
+                // Find and set an OnClickListener on the close button
+                findViewById<ImageView>(R.id.close_caution_button).setOnClickListener {
+                    removeOverlay()
+                }
+            }
+
+            val layoutParams = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                } else {
+                    WindowManager.LayoutParams.TYPE_PHONE
+                },
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.TRANSLUCENT
+            )
+
+            layoutParams.gravity = Gravity.CENTER
+
+            val windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+            windowManager.addView(overlayView, layoutParams)
+
+        } else {
             requestOverlayPermission()
         }
     }
@@ -170,6 +233,14 @@ class CallForegroundService : Service() {
         val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
+    }
+
+    private fun removeOverlay() {
+        overlayView?.let {
+            val windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+            windowManager.removeView(it)
+            overlayView = null
+        }
     }
 
     private fun cleanPhoneNumber(phoneNumber: String): String {

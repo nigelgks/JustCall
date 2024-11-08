@@ -43,9 +43,6 @@
     <service android:name=".CallForegroundService"
         android:foregroundServiceType="phoneCall"
     />
-    <service android:name=".CallHeadlessService"
-        android:permission="android.permission.BIND_JOB_SERVICE"
-    />
     <receiver android:name=".CallReceiver"/>
     <activity android:name=".MainActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|uiMode" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:theme="@style/Theme.App.SplashScreen" android:exported="true" android:screenOrientation="fullSensor"
         tools:ignore="DiscouragedApi">
@@ -57,7 +54,6 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="myapp"/>
         <data android:scheme="com.dev.justcall"/>
       </intent-filter>
     </activity>

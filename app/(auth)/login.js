@@ -17,9 +17,6 @@ import { useAppKitAccount,
          useAppKitProvider
        } from '@reown/appkit-ethers-react-native';
 
-//Import Javascript Component
-import { clearWalletSigner } from '../../components/comp/GlobalStore';
-
 //Setup contract ABI and address
 const contract = require("../../artifacts/contracts/JustCall.sol/JustCall.json");
 const abi = contract.abi;
@@ -47,8 +44,6 @@ const Login = () => {
     if (session) {
       console.log('Login successful. Redirecting to main page.');
       router.replace('keypad');
-    } else {
-      clearWalletSigner();
     };
   }, [session]);
 

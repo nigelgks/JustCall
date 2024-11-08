@@ -48,14 +48,12 @@ class MainActivity : ReactActivity() {
     }
 
     //REQUEST PHONE STATE PERMISSION FOR API 23+
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            Log.d("Call_Receiver", "[ACTIVITY] Call permission request")
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_PHONE_STATE), 1)
-        } else {
-            Log.d("Call_Receiver", "[ACTIVITY] Permission already granted")
-        }
-    }
+      if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+          Log.d("Call_Receiver", "[ACTIVITY] Call permission request")
+          ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_PHONE_STATE), 1)
+      } else {
+          Log.d("Call_Receiver", "[ACTIVITY] Permission already granted")
+      }
   }
 
   override fun onRequestPermissionsResult(

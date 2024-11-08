@@ -21,9 +21,6 @@ import { useAppKitAccount } from '@reown/appkit-ethers-react-native';
 import { AntDesign, Fontisto } from '@expo/vector-icons';
 import Octicons from '@expo/vector-icons/Octicons';
 
-//Import Javascript Component
-import { clearWalletSigner } from '../../components/comp/GlobalStore';
-
 const Profile = () => {
   //Retrieve connected wallet address
   const { address } = useAppKitAccount();
@@ -155,7 +152,6 @@ const Profile = () => {
       setLoading(false);
       console.log("Signed out successfully.");
       alert("Signed out successfully.");
-      clearWalletSigner();
       router.replace('wallet');
     } catch (error) {
         console.log("Unable to sign out: ", error);
