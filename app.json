@@ -29,7 +29,14 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "./queries.js",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow JustCall to access your camera"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

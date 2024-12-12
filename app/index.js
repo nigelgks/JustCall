@@ -1,7 +1,9 @@
 import React from "react";
 import { Redirect } from "expo-router";
 import { useAuth } from "../providers/AuthProvider";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, NativeModules } from "react-native";
+
+const { CallNativeModule } = NativeModules;
 
 const StartPage = () => {
     //Get hook from useAuth

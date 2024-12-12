@@ -4,22 +4,22 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 //Import APIs and router
 import { useRouter } from 'expo-router';
 import '@walletconnect/react-native-compat';
-import { createWeb3Modal,
+import { createAppKit,
          defaultConfig,
-         useWeb3ModalAccount,
-         Web3Modal
-        } from '@web3modal/ethers-react-native';
-import { W3mButton } from '@web3modal/ethers-react-native';
+         AppKit,
+         AppKitButton,
+         useAppKitAccount
+        } from '@reown/appkit-ethers-react-native';
 
 //Assign WalletConnect project ID from .env
-const projectId = process.env.EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID;
+const projectId = process.env.EXPO_PUBLIC_REOWN_PROJECT_ID;
 
 //WalletConnect metadata
 const metadata = {
     name: 'JustCall',
     description: 'JustCall Dapp',
-    url: 'https://walletconnect.com',
-    icons: ['https://avatars.githubusercontent.com/u/37784886'],
+    url: 'https://reown.com/appkit',
+    icons: ['https://avatars.githubusercontent.com/u/179229932'],
     redirect: {
       native: 'YOUR_APP_SCHEME://'
     }
@@ -50,15 +50,15 @@ const sepolia = {
 const chains = [mainnet, sepolia];
 
 //Establish WalletConnect modal
-createWeb3Modal({
+createAppKit({
     projectId,
     chains,
     config
 });
 
 const wallet = () => {
-  //Check whether a wallet is connected
-  const { isConnected } = useWeb3ModalAccount();
+  //Get wallet connection status and provider
+  const { isConnected } = useAppKitAccount();
 
   //Expo router navigation
   const router = useRouter();
@@ -72,8 +72,8 @@ const wallet = () => {
     <View style={styles.container}>
       <Text style={styles.title}>Connect to your wallet!</Text>
       <Text style={styles.desc}>Or create a new wallet if you haven't done so!</Text>
-      <Web3Modal/>
-      <W3mButton balance='show'/>
+      <AppKit/>
+      <AppKitButton balance='show'/>
       <TouchableOpacity 
         style={[styles.button, {backgroundColor: isConnected ? 'black' : 'grey'}]}
         onPress={handleContinue}

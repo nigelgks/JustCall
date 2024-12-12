@@ -11,12 +11,21 @@ import { View,
 //Import APIs and router
 import { useRouter } from 'expo-router';
 import { supabase } from '../../supabase/supabase';
+import { ethers, BrowserProvider } from 'ethers';
 import '@walletconnect/react-native-compat';
-import { useWeb3ModalAccount } from '@web3modal/ethers-react-native';
+import { useAppKitAccount,
+         useAppKitProvider
+       } from '@reown/appkit-ethers-react-native';
+
+//Setup contract ABI and address
+const contract = require("../../artifacts/contracts/JustCall.sol/JustCall.json");
+const abi = contract.abi;
+const contractAddress = process.env.EXPO_PUBLIC_CONTRACT_ADDR;
 
 const Login = () => {
-  //Retrieve connected wallet address
-  const { address } = useWeb3ModalAccount();
+  //Get wallet connection status and provider
+  const { address } = useAppKitAccount();
+  const { walletProvider } = useAppKitProvider();
 
   //Expo router navigation
   const router = useRouter();
@@ -26,6 +35,7 @@ const Login = () => {
   const [phoneFormat, setPhoneFormat] = useState(false);
   const [phoneLength, setPhoneLength] = useState(false);
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -76,106 +86,172 @@ const Login = () => {
   const handleLogin = async () => {
     setLoading(true);
 
-    const data = await checkAddress(address, false);
+    const {data, profile} = await checkAddress(address, false);
+    const supabaseData = data;
 
-    //Proceed login with password if wallet address already registered
-    if (data != null && data.length > 0) {
+    //Proceed login with password if wallet address already registered in Blockchain
+    if (profile != null) {
       const formattedNum = formatNum(phoneNum);
+  
+      const {error} = await supabase.auth.signInWithPassword({
+        phone: formattedNum,
+        password
+      });
 
-      if (data[0].phone == formattedNum) {
-        const {error} = await supabase.auth.signInWithPassword({
-            phone: formattedNum,
-            password
-        });
+      if (error) {
+        console.log("[LOGIN] Unable to login: ", error);
+        
+        if (error.message.includes('Invalid login credentials')) {
+          alert('Invalid login credentials.');
+        };
+      } else {
+        //Fetch session after login
+        const {data} = await supabase.auth.getSession();
+        console.log(data)
 
-        if (error) {
-          console.log("Unable to login: ", error);
+        //Append data if required
+        if (supabaseData == null) {
+          const addData = {
+            id: data.session.user.id,
+            name,
+            address,
+            phone: formattedNum
+          };
           
-          if (error.message.includes('Invalid login credentials')) {
-            alert('Invalid login credentials.');
+          const {error} = await supabase
+            .from('accounts')
+            .insert([addData])
+            .select();
+          
+          if (error) {
+            console.log('[LOGIN] Unable to update user table:', error);
+            alert('Error encountered. Please try again.');
+          } else {
+            console.log('[LOGIN] User table updated.');
           };
         };
 
-        //Update session after login
-        const {data} = await supabase.auth.getSession();
         setSession(data.session);
-      } else {
-        console.log('Mismatched phone number:', data[0].phone, '!=', formattedNum);
-        alert('Mismatched phone number linked to connected wallet address.');
       };
 
       setPhoneNum('+60 ');
       setPassword('');
     };
+
     setLoading(false);
   };
 
   //Function to handle registration operation
   const handleRegister = async () => {
-    const data = await checkAddress(address, true);
+    setLoading(true);
 
-    if (data.length === 0) {
-      //Proceed registration if wallet address is not registered
-      router.navigate('identification');
-    } else if (data.length > 0) {
-      //Show alert if wallet address is already registered
-      alert(`User wallet [${address}] is already registered. Please log in.`);
+    const {data, profile} = await checkAddress(address, true);
+
+    if (profile == null) {
+      if (data == null) {
+        //Proceed registration if wallet address is not registered
+        router.navigate('identification');
+      } else {
+        //Show alert if wallet address is already registered
+        alert(`User wallet [${address}] is already registered. Please log in.`);
+      };
     };
+
+    setLoading(false);
   };
 
   //Function to navigate to OTP verification page
   const handleOTP = async () => {
-    const data = await checkAddress(address, false);
+    setLoading(true);
 
-    //Proceed login with OTP if wallet address already registered
-    if (data != null && data.length > 0) {
+    const {data, profile} = await checkAddress(address, false);
+
+    //Proceed login with OTP if wallet address already registered in Blockchain
+    if (profile != null) {
       const formattedNum = formatNum(phoneNum);
-
-      if (data[0].phone == formattedNum) {
-        const signIn = true;
-        
-        const profile = {
-          signIn,
-          phoneNum: formattedNum
-        };
-        
-        router.navigate({
-          pathname: 'verification',
-          params: profile
-        });
-      } else {
-        console.log('Mismatched phone number:', data[0].phone, '!=', formattedNum);
-        alert('Mismatched phone number linked to connected wallet address.');
+      const signIn = true;
+      
+      const profile = {
+        signIn,
+        phoneNum: formattedNum,
+        name,
+        append: (data == null) ? true : false
       };
+      
+      router.navigate({
+        pathname: 'verification',
+        params: profile
+      });
 
       setPhoneNum('+60 ');
       setPassword('');
     };
+
+    setLoading(false);
   };
 
   //Check whether wallet address already exist in database
   const checkAddress = async (addr, register) => {
-    const { data, error } = await supabase
+    const provider = new BrowserProvider(walletProvider);
+    const signer = await provider.getSigner();
+    const justCall = new ethers.Contract(contractAddress, abi, signer);
+
+    try {
+      const profile = await justCall.getUserByAddress();
+      console.log("[LOGIN] Profile: ", profile);
+      setName(profile[0]);
+
+      const { data } = await supabase
       .from('accounts')
       .select('*')
       .like('address', addr);
 
-    if (error) {
-      console.log("Unable to search address: ", error);
-      return null;
-    } else if (data.length === 0) {
-      //Address does not exist in database
-      console.log('No address found in database.');
-      if (register == false) {
-        //Navigate user back to wallet page if address is not registered
-        alert('Address does not exist in database. Please select another wallet.');
-        router.back();
+      if (data.length === 0) {
+        //Address does not exist in database
+        console.log('[LOGIN] No address found in Supabase.');
+
+        return {
+          data: null,
+          profile
+        };
+
+      } else {
+        //Address already exist in database
+        console.log('[LOGIN] Address found in database:', data);
+
+        if (data[0].phone != profile[1]) {
+          // Mismatching number, redirect back to wallet page
+          console.log('[LOGIN] Mismatched phone number:', data[0].phone, '!=', profile[1]);
+          alert('Mismatched phone number linked to connected wallet address.');
+          router.back();
+        } else {
+          // Proceed login or OTP
+          return {
+            data,
+            profile
+          };
+        };
       };
-      return data;
-    } else {
-      //Address already exist in database
-      console.log('Address found in database:', data);
-      return data;
+
+    } catch (error) {
+
+      // User not registered in Blockchain
+      if (error.message.includes('User does not exist.')) {
+        if (register == false) {
+          // If login, redirect back to wallet
+          console.log('[LOGIN] User does not exist in Blockchain.');
+          alert('No user is registered with this address. Please select another wallet or register.');
+        };
+      } else {
+        // Other errors
+        console.log('[LOGIN] Error fetching address:', error);
+        alert('Error fetching address:', error);
+      };
+    };
+
+    return {
+      data: null,
+      profile: null
     };
   };
 
