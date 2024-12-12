@@ -5,5 +5,5 @@ Caller ID Android Dapp - binding Malaysia cellular number with unique ID of Mala
 
 
 Developed in React Native Framework |
-Supported by Solidity and Hardhat |
-Yet to be deployed and released
+Integrated with Solidity and Hardhat |
+Prototype fully deployed
