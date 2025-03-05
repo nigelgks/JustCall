@@ -41,8 +41,8 @@ import kotlinx.coroutines.withContext
 val web3j: Web3j = Web3j.build(HttpService("https://sepolia.infura.io/v3/6ec31da19e8b4d44a456b8ed4b8a6846"))
 
 // Replace with your wallet's private key and Sepolia smart contract address
-val credentials: Credentials = Credentials.create("5fba9e7f67b98be73dfa89bacd9226fcbe54326305324203ee7fd48f6f2403f6")
-const val contractAddress = "0xc2645B106e470DE08441a9Ec600C293de618333d"
+val credentials: Credentials = Credentials.create("[Wallet private key]")
+const val contractAddress = "[Smart contract address]"
 
 class CallForegroundService : Service() {
     private val channelID = "CallServiceChannel"
