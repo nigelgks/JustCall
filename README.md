@@ -11,7 +11,7 @@ A decentralized Caller ID Android application (DApp) that binds Malaysian mobile
 - eKYC verification powered by AnyForm
 - Browse, search, and contact verified caller IDs
 
-### Powered By
+### Stacks
 - React Native
 - Expo Development Build
 - Supabase (Cloud DB and IAM)
